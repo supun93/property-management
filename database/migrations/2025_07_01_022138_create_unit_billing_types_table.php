@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('properties', function (Blueprint $table) {
+        Schema::create('unit_billing_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('address');
-            $table->foreignId('category_id')->constrained('property_categories')->onDelete('cascade');
-            $table->foreignId('owner_id')->constrained('users')->onDelete('cascade');
-            $table->unsignedBigInteger("created_by")->nullable();
-            $table->unsignedBigInteger("updated_by")->nullable();
-            $table->unsignedBigInteger("deleted_by")->nullable();
-            $table->softDeletes();
+            $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
+            $table->foreignId('billing_type_id')->constrained('billing_types')->onDelete('cascade');
+            $table->integer('status')->default(1); // 1 = active, 0 = inactive
+            $table->unsignedBigInteger('created_by')->nullable();  
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign("created_by")->references("id")->on("users");
             $table->foreign("updated_by")->references("id")->on("users");
@@ -29,12 +28,11 @@ return new class extends Migration
         });
     }
 
-
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('property_categories');
+        Schema::dropIfExists('unit_billing_types');
     }
 };

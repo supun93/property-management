@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class PaymentTypes extends Model implements AuditableContract
+class BillingTypes extends Model implements AuditableContract
 {
     use SoftDeletes, Auditable, HasAuditFields;
 

@@ -48,18 +48,18 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
     });
 
-    Route::prefix('property-category')->group(function () {
-        Route::get('', [PropertyCategoryController::class, 'index'])->name('property-category.index');
+    Route::prefix('property-category')->name('property-category.')->group(function () {
+        Route::get('', [PropertyCategoryController::class, 'index'])->name('index');
         Route::post('', [PropertyCategoryController::class, 'index']);
-        Route::get('trash-list', [PropertyCategoryController::class, 'trash'])->name('property-category.trash-list');
+        Route::get('trash-list', [PropertyCategoryController::class, 'trash'])->name('trash-list');
         Route::post('trash-list', [PropertyCategoryController::class, 'trash']);
-        Route::get('create', [PropertyCategoryController::class, 'create'])->name('property-category.create');
-        Route::post('save', [PropertyCategoryController::class, 'save'])->name('property-category.save');
-        Route::get('edit/{id}', [PropertyCategoryController::class, 'edit'])->name('property-category.edit');
-        Route::post('update/{id}', [PropertyCategoryController::class, 'update'])->name('property-category.update');
-        Route::post('trash/{id}', [PropertyCategoryController::class, 'delete'])->name('property-category.trash');
-        Route::post('restore/{id}', [PropertyCategoryController::class, 'restore'])->name('property-category.restore');
-        Route::post('search_data', [PropertyCategoryController::class, 'searchData'])->name('property-category.search_data');
+        Route::get('create', [PropertyCategoryController::class, 'create'])->name('create');
+        Route::post('save', [PropertyCategoryController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [PropertyCategoryController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [PropertyCategoryController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [PropertyCategoryController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [PropertyCategoryController::class, 'restore'])->name('restore');
+        Route::post('search_data', [PropertyCategoryController::class, 'searchData'])->name('search_data');
     });
 
     Route::prefix('property')->group(function () {
@@ -112,3 +112,4 @@ Route::group(['middleware' => 'is_admin'], function () {
 
 
 require __DIR__ . '/auth.php';
+

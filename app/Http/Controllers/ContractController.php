@@ -48,13 +48,14 @@ class ContractController extends Controller
                 "agreement_start_date",
                 "agreement_end_date",
                 "rent_amount",
-                "deposit_amount",
+                "next_rent_due_date",
                 "status",
                 "approval_status",
                 "created_at"
             )
             ->setColumnLabel("tenant.name", "Tenant Name")
             ->setColumnLabel("unit.unit_number", "Unit Number")
+            ->setColumnLabel("next_rent_due_date", "Next Due Date")
             ->setColumnDisplay(
                 'status',
                 [$this->repository, 'displayStatusAs'],

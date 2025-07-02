@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Auditable;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Contract extends Model implements AuditableContract
+class UnitPaymentSchedules extends Model implements AuditableContract
 {
     use SoftDeletes, Auditable, HasAuditFields;
 
@@ -24,14 +24,16 @@ class Contract extends Model implements AuditableContract
         'deleted_at' => 'datetime:Y-m-d H:i:s'
     ];
 
-    public function unit()
+    public function contract()
     {
-        return $this->hasOne(Unit::class, 'id', 'unit_id');
+        return $this->hasOne(UnitContracts::class, 'id', 'contract_id');
     }
-    public function tenant()
+
+    public function unitBillingType()
     {
-        return $this->hasOne(Tenants::class, 'id', 'tenant_id');
+        return $this->hasOne(UnitBillingTypes::class, 'id', 'unit_billing_type_id');
     }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

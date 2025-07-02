@@ -9,21 +9,18 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up(): void  
     {
-        Schema::create('payment_types', function (Blueprint $table) {
+        Schema::create('billing_types', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->integer('status')->default(1); // 1 = active, 0 = inactive
+            $table->boolean('status')->default(1); // 1 = active, 0 = inactive
+            $table->integer("monthly_loop")->default(1);
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
-
-            $table->foreign("created_by")->references("id")->on("users");
-            $table->foreign("updated_by")->references("id")->on("users");
-            $table->foreign("deleted_by")->references("id")->on("users");
         });
     }
 

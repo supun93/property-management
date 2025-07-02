@@ -9,16 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up(): void 
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('unit_payment_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade')->nullable();
-            $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade')->nullable();
+            $table->foreignId('unit_contract_id')->constrained('unit_contracts')->onDelete('cascade')->nullable();
+            $table->foreignId('unit_billing_type_id')->constrained('unit_billing_types')->onDelete('cascade')->nullable();
+            $table->integer('is_rent')->default(0); // 1 = rent, 0 = other 
             $table->date('payment_date')->nullable();
             $table->decimal('amount', 10, 2)->nullable();
-            $table->string('method')->nullable(); // e.g., Cash, Bank Transfer, Cheque
-            $table->string('reference')->nullable(); // e.g., cheque number or transaction ID
             $table->text('note')->nullable();
             $table->integer('status')->default(0); // 1 = paid, 0 = pending
             $table->integer("approval_status")->nullable();
@@ -26,9 +25,9 @@ return new class extends Migration
             $table->integer("installment_number")->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('created_by')->constrained('contracts')->onDelete('cascade')->nullable();
-            $table->foreignId('updated_by')->constrained('contracts')->onDelete('cascade')->nullable();
-            $table->foreignId('deleted_by')->constrained('contracts')->onDelete('cascade')->nullable();
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade')->nullable();
+            $table->foreignId('updated_by')->constrained('users')->onDelete('cascade')->nullable();
+            $table->foreignId('deleted_by')->constrained('users')->onDelete('cascade')->nullable();
         });
     }
 
@@ -37,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('unit_payment_schedules');
     }
 };

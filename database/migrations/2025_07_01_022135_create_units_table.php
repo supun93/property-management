@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->string('unit_number');
+            $table->integer('floor')->nullable();
+            $table->decimal('area_sqft')->nullable();
             $table->foreignId('property_id')->constrained('properties')->onDelete('cascade');
-            $table->decimal('rent', 10, 2);
-            $table->boolean('is_occupied')->default(false);
-            
+            $table->decimal('rent_amount', 10, 2);
+            $table->integer('is_occupied')->default(false);
+
             $table->unsignedBigInteger("created_by")->nullable();
             $table->unsignedBigInteger("updated_by")->nullable();
             $table->unsignedBigInteger("deleted_by")->nullable();
