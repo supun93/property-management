@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillingTypesController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\PropertyCategoryController;
 use App\Http\Controllers\PropertyController;
@@ -89,7 +90,6 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('restore/{id}', [UnitController::class, 'restore'])->name('restore');
         Route::post('search_data', [UnitController::class, 'searchData'])->name('search_data');
     });
-
 });
 
 Route::group(['middleware' => 'is_admin'], function () {
@@ -108,8 +108,20 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('search_data', [UserController::class, 'searchData'])->name('search_data');
     });
 
+    Route::prefix('billing-types')->name('billing-types.')->group(function () {
+        Route::get('', [BillingTypesController::class, 'index'])->name('index');
+        Route::post('', [BillingTypesController::class, 'index']);
+        Route::get('trash-list', [BillingTypesController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [BillingTypesController::class, 'trash']);
+        Route::get('create', [BillingTypesController::class, 'create'])->name('create');
+        Route::post('save', [BillingTypesController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [BillingTypesController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [BillingTypesController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [BillingTypesController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [BillingTypesController::class, 'restore'])->name('restore');
+        Route::post('search_data', [BillingTypesController::class, 'searchData'])->name('search_data');
+    });
 });
 
 
 require __DIR__ . '/auth.php';
-
