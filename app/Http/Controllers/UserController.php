@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\IndexRepositoryHelper;
-use App\Models\Unit;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class UnitController extends Controller
+class UserController extends Controller
 {
     protected $repository;
     protected $trash;
@@ -15,34 +15,33 @@ class UnitController extends Controller
     public function __construct()
     {
         $this->trash = request()->has('trash');
-        $this->repository = new IndexRepositoryHelper(new Unit());
+        $this->repository = new IndexRepositoryHelper(new User());
     }
 
     public function index(Request $request)
     {
         if ($this->trash) {
-            $this->repository->setPageTitle("Units - Trashed");
+            $this->repository->setPageTitle("Users - Trashed");
         } else {
-            $this->repository->setPageTitle("Units");
+            $this->repository->setPageTitle("Users");
         }
 
         $this->repository
-            ->setColumns("id", "unit_number", "property.name", "rent", "is_occupied", "created_at")
-            ->setColumnLabel("property.name", "Property Name")
+            ->setColumns("id", "name", "email", "role", "created_at")
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
             ->setColumnSearchability("created_at", false);
 
 
-        $query = Unit::with(['property']);
+        $query = User::query();
 
         if ($this->trash) {
             $query = $query->onlyTrashed();
 
-            $this->repository->setTableTitle("Units - Trashed")
+            $this->repository->setTableTitle("Users - Trashed")
                 ->disableViewData("view")
                 ->enableViewData("export", "restore", "edit", "add", "list");
         } else {
-            $this->repository->setTableTitle("Units")
+            $this->repository->setTableTitle("Users")
                 ->disableViewData("view")
                 ->enableViewData("export", "trash", "edit", "add", "trashList");
         }
@@ -62,7 +61,7 @@ class UnitController extends Controller
     }
     public function edit($id)
     {
-        $record = Unit::with(['property'])->findOrFail($id);
+        $record = User::findOrFail($id);
         // create a new property category
         return view('unit.edit', compact('record'));
     }
@@ -75,7 +74,7 @@ class UnitController extends Controller
             'is_occupied' => 'required|boolean',
             'property_id' => 'required|exists:properties,id',
         ]);
-        $record = new Unit();
+        $record = new User();
         $record->unit_number = $request->unit_number;
         $record->rent = $request->rent;
         $record->is_occupied = $request->is_occupied;
@@ -86,7 +85,7 @@ class UnitController extends Controller
     }
     public function update($id, Request $request)
     {
-        $record = Unit::findOrFail($id);
+        $record = User::findOrFail($id);
          $data = request()->validate([
             'unit_number' => 'required|string|max:255',
             'rent' => 'required|numeric|min:0',
@@ -105,7 +104,7 @@ class UnitController extends Controller
 
     public function delete($id)
     {
-        $record = Unit::findOrFail($id);
+        $record = User::findOrFail($id);
         $record->delete();
 
         return response()->json("success");
@@ -113,23 +112,22 @@ class UnitController extends Controller
 
     public function restore($id)
     {
-        $record = Unit::withTrashed()->findOrFail($id);
+        $record = User::withTrashed()->findOrFail($id);
         $record->restore();
 
         return response()->json("success");
     }
-
-     public function searchData ()
+    public function searchData ()
     {
         $search = request()->get('query');
-        $query = Unit::query();
+        $query = User::query();
 
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $categories = $query->limit(10)->get(['id', 'name']);
+        $records = $query->limit(10)->get(['id', 'name']);
 
-        return response()->json($categories);
+        return response()->json($records);
     }
 }

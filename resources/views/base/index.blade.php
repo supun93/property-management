@@ -1,103 +1,184 @@
-@php use Illuminate\Support\Str; @endphp
+@extends('layouts.app')
+@push('styles')
+<style>
+    #main-table th,
+    #main-table td {
+        text-align: left !important;
+    }
 
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ $pageTitle ?? 'Property Categories' }}
-        </h2>
-    </x-slot>
+    /* 🛑 Key: wrapper must be relative */
+    #main-table_wrapper {
+        position: relative;
+        min-height: 300px;
+        /* Prevents small table from pushing spinner to top */
+    }
 
-    <div class="py-10">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    /* ✅ Force center the processing element */
+    div.dataTables_processing {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10000 !important;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex space-x-2">
-                        @if($viewData['add'])
-                        <a href="#" class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm">➕ Add New</a>
-                        @endif
-                        @if($viewData['trashList'])
-                        <a href="{{ url()->current() }}?trash=1" class="text-white bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded text-sm">🗑️ Trashed</a>
-                        @endif
-                        @if($viewData['export'])
-                        <button class="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-sm">📤 Export</button>
-                        @endif
-                    </div>
+    /* Optional: smooth hide effect */
+    div.dataTables_processing[style*="display: none"] {
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    div.dataTables_processing:not([style*="display: none"]) {
+        opacity: 1;
+    }
+</style>
+@endpush
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-sm-6">
+                <h4 class="card-title"><b>{{ Str::headline($tableTitle) }} List</b></h4>
+            </div>
+            <div class="col-sm-6">
+                <div class="float-right">
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.create') }}" class="btn btn-info">
+                        <span class="fa fa-plus"></span> ADD NEW
+                    </a>
+
+                    @if(Str::contains($tableTitle, 'Trash'))
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.index') }}" class="btn btn-info">
+                        <span class="fa fa-list"></span> VIEW LIST
+                    </a>
+                    @else
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list') }}" class="btn btn-danger">
+                        <span class="fa fa-trash"></span> VIEW TRASH
+                    </a>
+                    @endif
                 </div>
-
-                <div class="overflow-x-auto">
-                    <table id="main-table" class="w-full text-sm text-left text-gray-700 border rounded">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                            <tr>
-                                @foreach($columns as $col)
-                                <th scope="col" class="px-4 py-2" style="text-align: left;">
-                                    {{ $col == 'created_at' ? Str::headline('Created On') : Str::headline($col) }}
-                                </th>
-                                @endforeach
-                                <th class="px-4 py-2 text-center" style="text-align: left;">⚙️ Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($items as $item)
-                            <tr class="border-b">
-                                @foreach($columns as $col)
-                                <td class="px-4 py-2" style="text-align: left;">
-                                    @if(isset($columnDisplays[$col]))
-                                        {{ call_user_func($columnDisplays[$col]['callback'], $item->{$col}, ...$columnDisplays[$col]['args']) }}
-                                    @else
-                                        {{ $item->{$col} }}
-                                    @endif
-                                </td>
-                                @endforeach
-                                <td class="px-4 py-2 text-center whitespace-nowrap">
-                                    @if($viewData['edit'])
-                                    <a href="{{ route(Str::kebab(class_basename($model)) . '.edit', $item->id) }}" class="text-indigo-600 hover:underline text-sm">✏️</a>
-                                    @endif
-
-                                    @if($viewData['trash'])
-                                    <form action="{{ route(Str::kebab(class_basename($model)) . '.trash', $item->id) }}" method="POST" class="inline">
-                                        @csrf @method('DELETE')
-                                        <button class="text-red-600 hover:underline text-sm" type="submit">🗑️</button>
-                                    </form>
-                                    @endif
-
-                                    @if($viewData['restore'])
-                                    <form action="{{ route(Str::kebab(class_basename($model)) . '.restore', $item->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button class="text-green-600 hover:underline text-sm" type="submit">♻️</button>
-                                    </form>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
             </div>
         </div>
     </div>
+    <div class="card-body">
+        <table id="main-table" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    @foreach($columns as $col)
+                    <th>{{ is_array($col) ? $col['label'] : Str::headline(Str::afterLast($col, '.')) }}</th>
+                    @endforeach
+                    <th>⚙️ Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
-    @push('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
-    @endpush
+<script>
+    $(document).ready(function() {
 
-    @push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('#main-table').DataTable({
-                responsive: true,
-                language: {
-                    search: "🔍 Search:",
-                    lengthMenu: "Show _MENU_ entries",
-                    zeroRecords: "No matching records found",
-                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+        $('#main-table').DataTable({
+            processing: true,
+            serverSide: true,
+            deferRender: true,
+            order: [
+                [0, 'desc']
+            ],
+            ajax: {
+                url: '{{ url()->current() }}',
+                type: 'POST',
+                data: function(d) {
+                    d._token = '{{ csrf_token() }}'; // CSRF token required for POST
                 }
-            });
+            },
+            columns: [
+                @foreach($columns as $col) {
+                    data: '{{ is_array($col) ? $col["key"] : $col }}',
+                    name: '{{ is_array($col) ? $col["key"] : $col }}',
+                    @if(Str::contains(is_array($col) ? $col["key"] : $col, '.'))
+                    defaultContent: '',
+                    @endif
+                },
+                @endforeach {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "🔍 Search...",
+                processing: '<span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span> Loading...'
+
+            },
         });
-    </script>
-    @endpush
-</x-app-layout>
+    });
+
+    $(document).on('click', '.trashButton', function() {
+        var url = $(this).data('url');
+        $.confirm({
+            title: 'Confirm Deletion',
+            content: 'Are you sure you want to delete this item?',
+            closeIcon: false,
+            backgroundDismiss: true,
+            buttons: {
+                confirm: function() {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            $.alert('Item deleted successfully!');
+                            $('#main-table').DataTable().ajax.reload();
+                        },
+                        error: function(xhr) {
+                            $.alert('Error deleting item: ' + xhr.responseText);
+                        }
+                    });
+                },
+                cancel: function() {}
+            }
+        });
+    });
+    $(document).on('click', '.restoreButton', function() {
+        var url = $(this).data('url');
+        $.confirm({
+            title: 'Confirm Restore',
+            content: 'Are you sure you want to restore this item?',
+            closeIcon: false,
+            backgroundDismiss: true, // not worked
+            buttons: {
+                confirm: function() {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            $.alert('Item restored successfully!');
+                            $('#main-table').DataTable().ajax.reload();
+                        },
+                        error: function(xhr) {
+                            $.alert('Error restoring item: ' + xhr.responseText);
+                        }
+                    });
+                },
+                cancel: function() {}
+            }
+        });
+    });
+</script>
+@endsection
