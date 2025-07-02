@@ -15,11 +15,21 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
             $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
-            $table->date('agreement_start_date');
-            $table->date('agreement_end_date');
-            $table->decimal('rent_amount', 10, 2);
+             $table->date('agreement_start_date')->nullable();
+            $table->date('agreement_end_date')->nullable();
+
+            $table->integer('rent_payment_type')->nullable()->comment('null:none, 1:month, 2:6months, 3:year');
+            $table->decimal('full_amount', 10, 2)->nullable();
+            $table->decimal('total_paid_amount', 10, 2)->nullable();
+            $table->date('next_rent_due_date')->nullable();
+
+            $table->decimal('rent_amount', 10, 2)->nullable();
+            $table->integer('total_installments')->nullable();
+            $table->integer('completed_installments')->nullable();
+
             $table->decimal('deposit_amount', 10, 2)->nullable();
             $table->text('terms')->nullable();
+
             $table->integer('status')->default(0);
             $table->integer("approval_status")->nullable();
             $table->string("approval_remarks")->nullable();

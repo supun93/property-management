@@ -12,12 +12,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+});
 
 Route::group(['middleware' => 'is_manager'], function () {
-   Route::prefix('tenant')->name('tenants.')->group(function () {
+
+    Route::prefix('tenant')->name('tenants.')->group(function () {
         Route::get('', [TenantController::class, 'index'])->name('index');
         Route::post('', [TenantController::class, 'index']);
         Route::get('trash-list', [TenantController::class, 'trash'])->name('trash-list');
@@ -31,7 +34,7 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('search_data', [TenantController::class, 'searchData'])->name('search_data');
     });
 
-     Route::prefix('contracts')->name('contract.')->group(function () {
+    Route::prefix('contracts')->name('contract.')->group(function () {
         Route::get('', [ContractController::class, 'index'])->name('index');
         Route::post('', [ContractController::class, 'index']);
         Route::get('trash-list', [ContractController::class, 'trash'])->name('trash-list');
@@ -43,23 +46,6 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('trash/{id}', [ContractController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [ContractController::class, 'restore'])->name('restore');
         Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
-    });
-});
-
-Route::group(['middleware' => 'is_admin'], function () {
-
-    Route::prefix('user')->name('user.')->group(function () {
-        Route::get('', [UserController::class, 'index'])->name('index');
-        Route::post('', [UserController::class, 'index']);
-        Route::get('trash-list', [UserController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [UserController::class, 'trash']);
-        Route::get('create', [UserController::class, 'create'])->name('create');
-        Route::post('save', [UserController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [UserController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [UserController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [UserController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [UserController::class, 'restore'])->name('restore');
-        Route::post('search_data', [UserController::class, 'searchData'])->name('search_data');
     });
 
     Route::prefix('property-category')->group(function () {
@@ -74,7 +60,6 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('trash/{id}', [PropertyCategoryController::class, 'delete'])->name('property-category.trash');
         Route::post('restore/{id}', [PropertyCategoryController::class, 'restore'])->name('property-category.restore');
         Route::post('search_data', [PropertyCategoryController::class, 'searchData'])->name('property-category.search_data');
-    
     });
 
     Route::prefix('property')->group(function () {
@@ -105,7 +90,23 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('search_data', [UnitController::class, 'searchData'])->name('search_data');
     });
 
-     
+});
+
+Route::group(['middleware' => 'is_admin'], function () {
+
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('', [UserController::class, 'index'])->name('index');
+        Route::post('', [UserController::class, 'index']);
+        Route::get('trash-list', [UserController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [UserController::class, 'trash']);
+        Route::get('create', [UserController::class, 'create'])->name('create');
+        Route::post('save', [UserController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [UserController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [UserController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [UserController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [UserController::class, 'restore'])->name('restore');
+        Route::post('search_data', [UserController::class, 'searchData'])->name('search_data');
+    });
 
 });
 

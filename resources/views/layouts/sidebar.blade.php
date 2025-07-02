@@ -1,3 +1,8 @@
+@php
+$isAdmin = auth()->check() && auth()->user()->role === 1;
+$isManager = auth()->check() && auth()->user()->role === 2;
+@endphp
+
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <a href="/" class="brand-link">
     <span class="brand-text font-weight-light">AdminLTE</span>
@@ -14,6 +19,7 @@
           </a>
         </li>
 
+        @if($isManager || $isAdmin)
         {{-- Property Category --}}
         <li class="nav-item">
           <a href="{{ route('property-category.index') }}" class="nav-link">
@@ -37,15 +43,6 @@
             <p>Units</p>
           </a>
         </li>
-
-        {{-- Users --}}
-        <li class="nav-item">
-          <a href="{{ route('user.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Users</p>
-          </a>
-        </li>
-
         {{-- Tenants --}}
         <li class="nav-item">
           <a href="{{ route('tenants.index') }}" class="nav-link">
@@ -61,8 +58,20 @@
             <p>Contracts</p>
           </a>
         </li>
+        @endif
 
-         <li class="nav-item">
+        @if($isAdmin)
+        {{-- Users --}}
+        <li class="nav-item">
+          <a href="{{ route('user.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Users</p>
+          </a>
+        </li>
+        @endif
+
+
+        <li class="nav-item">
           <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="dropdown-item" style="color: #a79999;">Logout</button>
