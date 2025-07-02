@@ -151,7 +151,7 @@ class ContractController extends Controller
 
             }
         }
-        
+
         // Return or process as needed
         return [
             'total_installments' => $totalInstallment,
@@ -188,7 +188,7 @@ class ContractController extends Controller
 
         // Calculate rental payment fields
         $calc = $this->generateRentalPayments($record);
-        dd($calc);
+        
         $record->rent_amount = $calc['rent_amount'];
         $record->total_installments = $calc['total_installments'];
         $record->next_rent_due_date = $calc['next_due_date'];
@@ -201,7 +201,7 @@ class ContractController extends Controller
             $record->total_paid_amount = $record->rent_amount;
         }
 
-        dd($record);
+        
         $record->save();
 
         return response()->json("success");
