@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
-            $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade');
-            $table->date('payment_date');
-            $table->decimal('amount', 10, 2);
+            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade')->nullable();
+            $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade')->nullable();
+            $table->date('payment_date')->nullable();
+            $table->decimal('amount', 10, 2)->nullable();
             $table->string('method')->nullable(); // e.g., Cash, Bank Transfer, Cheque
             $table->string('reference')->nullable(); // e.g., cheque number or transaction ID
             $table->text('note')->nullable();
