@@ -57,13 +57,11 @@ class PropertyCategoryController extends BaseController
     
     public function create()
     {
-        // create a new property category
         return view('property-category.create');
     }
     public function edit($id)
     {
         $record = PropertyCategory::findOrFail($id);
-        // create a new property category
         return view('property-category.edit', compact('record'));
     }
 

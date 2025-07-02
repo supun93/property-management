@@ -64,7 +64,6 @@ class PropertyController extends Controller
     public function edit($id)
     {
         $record = Property::with(['category', 'owner'])->findOrFail($id);
-        // create a new property category
         return view('property.edit', compact('record'));
     }
 
@@ -129,8 +128,8 @@ class PropertyController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $categories = $query->limit(10)->get(['id', 'name']);
+        $records = $query->limit(10)->get(['id', 'name']);
 
-        return response()->json($categories);
+        return response()->json($records);
     }
 }

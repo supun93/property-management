@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\PropertyCategoryController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\TenantController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -15,10 +16,34 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::group(['middleware' => 'is_manager'], function () {
+   Route::prefix('tenant')->name('tenants.')->group(function () {
+        Route::get('', [TenantController::class, 'index'])->name('index');
+        Route::post('', [TenantController::class, 'index']);
+        Route::get('trash-list', [TenantController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [TenantController::class, 'trash']);
+        Route::get('create', [TenantController::class, 'create'])->name('create');
+        Route::post('save', [TenantController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [TenantController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [TenantController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [TenantController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [TenantController::class, 'restore'])->name('restore');
+        Route::post('search_data', [TenantController::class, 'searchData'])->name('search_data');
+    });
+
+     Route::prefix('contracts')->name('contract.')->group(function () {
+        Route::get('', [ContractController::class, 'index'])->name('index');
+        Route::post('', [ContractController::class, 'index']);
+        Route::get('trash-list', [ContractController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [ContractController::class, 'trash']);
+        Route::get('create', [ContractController::class, 'create'])->name('create');
+        Route::post('save', [ContractController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [ContractController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [ContractController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [ContractController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [ContractController::class, 'restore'])->name('restore');
+        Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
+    });
 });
 
 Route::group(['middleware' => 'is_admin'], function () {

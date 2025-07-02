@@ -63,7 +63,6 @@ class UnitController extends Controller
     public function edit($id)
     {
         $record = Unit::with(['property'])->findOrFail($id);
-        // create a new property category
         return view('unit.edit', compact('record'));
     }
 
@@ -87,7 +86,7 @@ class UnitController extends Controller
     public function update($id, Request $request)
     {
         $record = Unit::findOrFail($id);
-         $data = request()->validate([
+        $data = request()->validate([
             'unit_number' => 'required|string|max:255',
             'rent' => 'required|numeric|min:0',
             'is_occupied' => 'required|boolean',
@@ -119,17 +118,23 @@ class UnitController extends Controller
         return response()->json("success");
     }
 
-     public function searchData ()
+    public function searchData()
     {
         $search = request()->get('query');
         $query = Unit::query();
 
         if ($search) {
-            $query->where('name', 'like', '%' . $search . '%');
+            $query->where('unit_number', 'like', '%' . $search . '%');
         }
 
-        $categories = $query->limit(10)->get(['id', 'name']);
-
-        return response()->json($categories);
+        $records = $query->limit(10)->get(['id', 'unit_number']);
+        $data = [];
+        foreach ($records as $rec) {
+            $row = [];
+            $row["id"] = $rec->id;
+            $row["name"] = $rec->unit_number;
+            $data[] = $row;
+        }
+        return response()->json($data);
     }
 }

@@ -6,6 +6,7 @@ use App\Helpers\IndexRepositoryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -57,28 +58,27 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('unit.create');
+        return view('user.create');
     }
     public function edit($id)
     {
-        $record = User::findOrFail($id);
-        // create a new property category
-        return view('unit.edit', compact('record'));
+        $user = User::findOrFail($id);
+        return view('user.edit', compact('user'));
     }
 
     public function save(Request $request)
     {
         $data = request()->validate([
-            'unit_number' => 'required|string|max:255',
-            'rent' => 'required|numeric|min:0',
-            'is_occupied' => 'required|boolean',
-            'property_id' => 'required|exists:properties,id',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string|max:50',
+            'password' => 'required|string|min:6',
         ]);
         $record = new User();
-        $record->unit_number = $request->unit_number;
-        $record->rent = $request->rent;
-        $record->is_occupied = $request->is_occupied;
-        $record->property_id = $request->property_id;
+        $record->name = $request->name;
+        $record->email = $request->email;
+        $record->role = $request->role;
+        $record->password = Hash::make($request->password);
         $record->save();
 
         return response()->json("success");
@@ -86,17 +86,17 @@ class UserController extends Controller
     public function update($id, Request $request)
     {
         $record = User::findOrFail($id);
-         $data = request()->validate([
-            'unit_number' => 'required|string|max:255',
-            'rent' => 'required|numeric|min:0',
-            'is_occupied' => 'required|boolean',
-            'property_id' => 'required|exists:properties,id',
+        $data = request()->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role' => 'required|string|max:50',
+            'password' => 'required|string|min:6',
         ]);
 
-        $record->unit_number = $request->unit_number;
-        $record->rent = $request->rent;
-        $record->is_occupied = $request->is_occupied;
-        $record->property_id = $request->property_id;
+        $record->name = $request->name;
+        $record->email = $request->email;
+        $record->role = $request->role;
+        $record->password = Hash::make($request->password);
         $record->save();
 
         return response()->json("success");
@@ -117,7 +117,7 @@ class UserController extends Controller
 
         return response()->json("success");
     }
-    public function searchData ()
+    public function searchData()
     {
         $search = request()->get('query');
         $query = User::query();

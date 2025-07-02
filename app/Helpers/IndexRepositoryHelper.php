@@ -35,6 +35,24 @@ class IndexRepositoryHelper
         $this->defaultOrderDir = 'desc';
     }
 
+    public function displayStatusAs($value, $statuses = [], $defaultLabel = '', $showChip = true)
+    {
+        // $matched = collect($statuses)->firstWhere('id', $value); dont use firstWhere because when value is 0, its show null
+        $matched = null;
+        foreach ($statuses as $status) {
+            if (array_key_exists('id', $status) && $status['id'] === $value) {
+                $matched = $status;
+                break;
+            }
+        }
+
+        if (!$showChip) {
+            return $matched['label'];
+        }
+
+        return '<span class="badge badge-' . $matched['class'] . '">' . $matched['label'] . '</span>';
+    }
+
     public function setColumns(...$columns)
     {
         $this->columns = array_map(function ($col) {
@@ -150,6 +168,17 @@ class IndexRepositoryHelper
         foreach ($this->columns as $col) {
             $colKey = is_array($col) ? $col['key'] : $col;
 
+            if (isset($this->columnDisplayCallbacks[$colKey])) {
+                $datatable->editColumn($colKey, function ($item) use ($colKey) {
+                    $callbackData = $this->columnDisplayCallbacks[$colKey];
+                    return call_user_func_array($callbackData['callback'], [
+                        data_get($item, $colKey),
+                        ...$callbackData['args'],
+                    ]);
+                });
+                continue;
+            }
+
             if (Str::contains($colKey, '.')) {
                 $datatable->addColumn($colKey, fn($item) => data_get($item, $colKey));
             }
@@ -196,7 +225,7 @@ class IndexRepositoryHelper
             }
         }
 
-        return $datatable->rawColumns(['actions'])->make(true);
+        return $datatable->rawColumns(['actions', 'status', 'approval_status'])->make(true);
     }
 
     public function setDefaultOrder(string $column, string $direction = 'desc')

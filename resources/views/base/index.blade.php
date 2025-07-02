@@ -59,9 +59,10 @@
                     <a href="{{ route(Str::kebab(class_basename($model)) . '.index') }}" class="btn btn-info">
                         <span class="fa fa-list"></span> VIEW LIST
                     </a>
-                    @else
+                    @else 
+                    
                     <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list') }}" class="btn btn-danger">
-                        <span class="fa fa-trash"></span> VIEW TRASH
+                        🗑️ VIEW TRASH
                     </a>
                     @endif
                 </div>
@@ -140,7 +141,11 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            $.alert('Item deleted successfully!');
+                            $.alert({
+                                title: 'Success',
+                                content: 'Item deleted successfully!',
+                                backgroundDismiss: true
+                            });
                             $('#main-table').DataTable().ajax.reload();
                         },
                         error: function(xhr) {
@@ -168,7 +173,11 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            $.alert('Item restored successfully!');
+                            $.alert({
+                                title: 'Success',
+                                content: 'Item restored successfully!',
+                                backgroundDismiss: true
+                            });
                             $('#main-table').DataTable().ajax.reload();
                         },
                         error: function(xhr) {

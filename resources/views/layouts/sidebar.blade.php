@@ -46,6 +46,22 @@
           </a>
         </li>
 
+        {{-- Tenants --}}
+        <li class="nav-item">
+          <a href="{{ route('tenants.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Tenants</p>
+          </a>
+        </li>
+
+        {{-- Contracts --}}
+        <li class="nav-item">
+          <a href="{{ route('contract.index') }}" class="nav-link">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Contracts</p>
+          </a>
+        </li>
+
          <li class="nav-item">
           <form method="POST" action="{{ route('logout') }}">
             @csrf
