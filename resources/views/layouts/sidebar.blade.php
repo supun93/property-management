@@ -53,7 +53,7 @@ $isManager = auth()->check() && auth()->user()->role === 2;
 
         {{-- Contracts --}}
         <li class="nav-item">
-          <a href="{{ route('contract.index') }}" class="nav-link">
+          <a href="{{ route('unit-contracts.index') }}" class="nav-link">
             <i class="nav-icon fas fa-users"></i>
             <p>Contracts</p>
           </a>

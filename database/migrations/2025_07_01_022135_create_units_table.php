@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
+        Schema::create('units', function (Blueprint $table) { 
             $table->id();
-            $table->string('unit_number');
+            $table->string('unit_name');
             $table->integer('floor')->nullable();
             $table->decimal('area_sqft')->nullable();
             $table->foreignId('property_id')->constrained('properties')->onDelete('cascade');

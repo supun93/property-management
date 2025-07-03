@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BillingTypes;
+use App\Models\UnitBillingTypes;
 use App\Helpers\IndexRepositoryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
-class BillingTypesController extends BaseController
+class UnitBillingTypesController extends BaseController
 {
     protected $repository;
     protected $trash;
@@ -15,13 +15,8 @@ class BillingTypesController extends BaseController
     public function __construct()
     {
         $this->trash = request()->has('trash');
-        $this->repository = new IndexRepositoryHelper(new BillingTypes());
+        $this->repository = new IndexRepositoryHelper(new UnitBillingTypes());
     }
-
-    public $loopStatuses = [
-        'Enabled' => ['id' => 1, 'label' => 'Enabled', 'class' => 'success'],
-        'Disable' => ['id' => 0, 'label' => 'Disabled', 'class' => 'danger']
-    ];
 
     public $statuses = [
         'active' => ['id' => 1, 'label' => 'Active', 'class' => 'success'],
@@ -31,19 +26,16 @@ class BillingTypesController extends BaseController
     public function index(Request $request)
     {
         if ($this->trash) {
-            $this->repository->setPageTitle("Billing Types - Trashed");
+            $this->repository->setPageTitle("Unit Billing Types - Trashed");
         } else {
-            $this->repository->setPageTitle("Billing Types");
+            $this->repository->setPageTitle("Unit Billing Types");
         }
 
         $this->repository
-            ->setColumns("id", "name", "monthly_loop", "status", "created_at")
+            ->setColumns("id", "unit.unit_name", "billingType.name", "status", "created_at")
+            ->setColumnLabel("unit.unit_name", "Unit Name")
+            ->setColumnLabel("billingType.name", "Billing Type Name")
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
-            ->setColumnDisplay(
-                'monthly_loop',
-                [$this->repository, 'displayStatusAs'],
-                [$this->loopStatuses, '', true] // ✅ 3rd param: pass statuses + showChip true
-            ) 
             ->setColumnDisplay(
                 'status',
                 [$this->repository, 'displayStatusAs'],
@@ -52,16 +44,16 @@ class BillingTypesController extends BaseController
             ->setColumnSearchability("created_at", false);
 
 
-        $query = BillingTypes::query(); // remove createdBy
+        $query = UnitBillingTypes::query(); // remove createdBy
 
         if ($this->trash) {
             $query = $query->onlyTrashed();
 
-            $this->repository->setTableTitle("Billing Types - Trashed")
+            $this->repository->setTableTitle("Unit Billing Types - Trashed")
                 ->disableViewData("view")
                 ->enableViewData("export", "restore", "edit", "add", "list");
         } else {
-            $this->repository->setTableTitle("Billing Types")
+            $this->repository->setTableTitle("Unit Billing Types")
                 ->disableViewData("view")
                 ->enableViewData("export", "trash", "edit", "add", "trashList");
         }
@@ -77,40 +69,39 @@ class BillingTypesController extends BaseController
 
     public function create()
     {
-        return view('billing-types.create');
+        return view('unit-billing-types.create');
     }
     public function edit($id)
     {
-        $record = BillingTypes::findOrFail($id);
-        return view('billing-types.edit', compact('record'));
+        $record = UnitBillingTypes::findOrFail($id);
+        return view('unit-billing-types.edit', compact('record'));
     }
 
     public function save(Request $request)
     {
         $data = request()->validate([
-            'name' => 'required|string|max:255',
-            'monthly_loop' => 'nullable|integer',
+            'unit_id' => 'required|exists:units,id',
+            'billing_type_id' => 'required|exists:billing_types,id',
         ]);
 
-        $record = new BillingTypes();
-        $record->name = $request->name;
-        $record->monthly_loop = $request->monthly_loop;
+        $record = new UnitBillingTypes();
+        $record->unit_id = $request->unit_id;
+        $record->billing_type_id = $request->billing_type_id;
         $record->save();
 
         return response()->json("success");
     }
     public function update($id, Request $request)
     {
-        $record = BillingTypes::findOrFail($id);
+        $record = UnitBillingTypes::findOrFail($id);
         $data = request()->validate([
-            'name' => 'required|string|max:255',
-            'status' => 'nullable|integer',
-            'monthly_loop' => 'nullable|integer',
+            'unit_id' => 'required|exists:units,id',
+            'billing_type_id' => 'required|exists:billing_types,id',
         ]);
 
-        $record->name = $request->name;
+        $record->unit_id = $request->unit_id;
+        $record->billing_type_id = $request->billing_type_id;
         $record->status = $request->status;
-        $record->monthly_loop = $request->monthly_loop;
         $record->save();
 
         return response()->json("success");
@@ -118,7 +109,7 @@ class BillingTypesController extends BaseController
 
     public function delete($id)
     {
-        $record = BillingTypes::findOrFail($id);
+        $record = UnitBillingTypes::findOrFail($id);
         $record->delete();
 
         return response()->json("success");
@@ -126,7 +117,7 @@ class BillingTypesController extends BaseController
 
     public function restore($id)
     {
-        $record = BillingTypes::withTrashed()->findOrFail($id);
+        $record = UnitBillingTypes::withTrashed()->findOrFail($id);
         $record->restore();
 
         return response()->json("success");
@@ -135,7 +126,7 @@ class BillingTypesController extends BaseController
     public function searchData()
     {
         $search = request()->get('query');
-        $query = BillingTypes::query();
+        $query = UnitBillingTypes::query();
 
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');

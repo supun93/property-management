@@ -27,6 +27,13 @@
         <label for="name">Name <span class="text-danger">*</span></label>
         <input type="text" name="name" class="form-control" id="name" placeholder="Enter name" required>
       </div>
+      <div class="form-group">
+        <label>Monthly Loop</label>
+        <select name="monthly_loop" class="form-control">
+          <option value="1">Enable</option>
+          <option value="0">Disable</option>
+        </select>
+      </div>
     </div>
 
     <div class="card-footer">

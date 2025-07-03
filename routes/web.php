@@ -5,6 +5,7 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\PropertyCategoryController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\TenantController;
+use App\Http\Controllers\UnitBillingTypesController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -35,7 +36,7 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('search_data', [TenantController::class, 'searchData'])->name('search_data');
     });
 
-    Route::prefix('contracts')->name('contract.')->group(function () {
+    Route::prefix('contracts')->name('unit-contracts.')->group(function () {
         Route::get('', [ContractController::class, 'index'])->name('index');
         Route::post('', [ContractController::class, 'index']);
         Route::get('trash-list', [ContractController::class, 'trash'])->name('trash-list');
@@ -120,6 +121,20 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('trash/{id}', [BillingTypesController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [BillingTypesController::class, 'restore'])->name('restore');
         Route::post('search_data', [BillingTypesController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('unit-billing-types')->name('unit-billing-types.')->group(function () {
+        Route::get('', [UnitBillingTypesController::class, 'index'])->name('index');
+        Route::post('', [UnitBillingTypesController::class, 'index']);
+        Route::get('trash-list', [UnitBillingTypesController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [UnitBillingTypesController::class, 'trash']);
+        Route::get('create', [UnitBillingTypesController::class, 'create'])->name('create');
+        Route::post('save', [UnitBillingTypesController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [UnitBillingTypesController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [UnitBillingTypesController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [UnitBillingTypesController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [UnitBillingTypesController::class, 'restore'])->name('restore');
+        Route::post('search_data', [UnitBillingTypesController::class, 'searchData'])->name('search_data');
     });
 });
 

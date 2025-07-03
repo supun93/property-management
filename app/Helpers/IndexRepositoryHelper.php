@@ -225,7 +225,7 @@ class IndexRepositoryHelper
             }
         }
 
-        return $datatable->rawColumns(['actions', 'status', 'approval_status'])->make(true);
+        return $datatable->rawColumns(['actions', 'status', 'approval_status', "monthly_loop"])->make(true);
     }
 
     public function setDefaultOrder(string $column, string $direction = 'desc')

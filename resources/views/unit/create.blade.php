@@ -25,14 +25,25 @@
   <form id="submitForm" method="POST" data-url="{{ route('unit.save') }}">
     @csrf
     <div class="card-body">
+
       <div class="form-group">
-        <label>Unit Number <span class="text-danger">*</span></label>
-        <input type="text" name="unit_number" class="form-control" placeholder="Enter unit number" required>
+        <label>Unit Name <span class="text-danger">*</span></label>
+        <input type="text" name="unit_name" class="form-control" placeholder="Enter unit name" required>
+      </div>
+
+      <div class="form-group">
+        <label>Floor No <span class="text-danger">*</span></label>
+        <input type="number" name="floor" class="form-control" placeholder="Enter floor" required>
+      </div>
+
+      <div class="form-group">
+        <label>Area Sqft</label>
+        <input type="number" step="0.01" name="area_sqft" class="form-control" placeholder="Area Sqft">
       </div>
 
       <div class="form-group">
         <label>Rent Amount</label>
-        <input type="number" step="0.01" name="rent" class="form-control" placeholder="Enter rent">
+        <input type="number" step="0.01" name="rent_amount" class="form-control" placeholder="Enter rent">
       </div>
 
       <div class="form-group">
@@ -58,7 +69,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.js"></script>
 <script>
-  $(document).ready(function () {
+  $(document).ready(function() {
     const propertyBox = $('#property_id').magicSuggest({
       placeholder: 'Select property',
       valueField: 'id',
@@ -66,19 +77,21 @@
       maxSelection: 1,
       ajaxConfig: {
         method: 'POST',
-        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        headers: {
+          'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
       },
       data: "{{ route('property.search_data') }}"
     });
 
     setTimeout(() => {
-      $('.ms-ctn input').on('focus', function () {
+      $('.ms-ctn input').on('focus', function() {
         const ms = $(this).closest('.ms-ctn').data('magicSuggest');
         if (ms) ms.expand();
       });
     }, 300);
 
-    $('#submitForm').on('submit', function (e) {
+    $('#submitForm').on('submit', function(e) {
       e.preventDefault();
       const url = $(this).data('url');
       const propertyVal = propertyBox.getValue()[0];
@@ -89,7 +102,10 @@
       }
 
       const formData = $(this).serializeArray();
-      formData.push({ name: "property_id", value: propertyVal });
+      formData.push({
+        name: "property_id",
+        value: propertyVal
+      });
 
       postData(url, $.param(formData), 1, 'store');
     });

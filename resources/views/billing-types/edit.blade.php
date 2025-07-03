@@ -27,6 +27,20 @@
         <label for="name">Name <span class="text-danger">*</span></label>
         <input type="text" name="name" class="form-control" id="name" value="{{ $record->name ?? '' }}" placeholder="Enter name" required>
       </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select name="status" class="form-control">
+          <option value="1" {{ $record->status == 1 ? 'selected' : '' }}>Active</option>
+          <option value="0" {{ $record->status == 0 ? 'selected' : '' }}>Inactive</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monthly Loop</label>
+        <select name="monthly_loop" class="form-control">
+          <option value="1" {{ $record->status == 1 ? 'selected' : '' }}>Enable</option>
+          <option value="0" {{ $record->status == 0 ? 'selected' : '' }}>Disable</option>
+        </select>
+      </div>
     </div>
 
     <div class="card-footer">

@@ -26,13 +26,23 @@
     @csrf
     <div class="card-body">
       <div class="form-group">
-        <label>Unit Number <span class="text-danger">*</span></label>
-        <input type="text" name="unit_number" class="form-control" value="{{ $record->unit_number }}" required>
+        <label>Unit Name <span class="text-danger">*</span></label>
+        <input type="text" name="unit_name" class="form-control" placeholder="Enter unit name" required value="{{ $record->unit_name }}">
+      </div>
+
+      <div class="form-group">
+        <label>Floor No <span class="text-danger">*</span></label>
+        <input type="number" name="floor" class="form-control" placeholder="Enter floor" required value="{{ $record->floor }}">
+      </div>
+
+      <div class="form-group">
+        <label>Area Sqft</label>
+        <input type="number" step="0.01" name="area_sqft" class="form-control" placeholder="Area Sqft" value="{{ $record->area_sqft }}">
       </div>
 
       <div class="form-group">
         <label>Rent Amount</label>
-        <input type="number" step="0.01" name="rent" class="form-control" value="{{ $record->rent }}">
+        <input type="number" step="0.01" name="rent_amount" class="form-control" value="{{ $record->rent_amount }}">
       </div>
 
       <div class="form-group">

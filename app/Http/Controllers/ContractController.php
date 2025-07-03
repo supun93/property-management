@@ -6,6 +6,8 @@ use App\Helpers\IndexRepositoryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
 use App\Models\Payments;
+use App\Models\UnitContracts;
+use App\Models\UnitPaymentSchedules;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
@@ -16,7 +18,7 @@ class ContractController extends Controller
     public function __construct()
     {
         $this->trash = request()->has('trash');
-        $this->repository = new IndexRepositoryHelper(new Contract());
+        $this->repository = new IndexRepositoryHelper(new UnitContracts());
     }
 
     public $statuses = [
@@ -35,16 +37,16 @@ class ContractController extends Controller
     public function index(Request $request)
     {
         if ($this->trash) {
-            $this->repository->setPageTitle("Contracts - Trashed");
+            $this->repository->setPageTitle("Unit Contracts - Trashed");
         } else {
-            $this->repository->setPageTitle("Contracts");
+            $this->repository->setPageTitle("Unit Contracts");
         }
 
         $this->repository
             ->setColumns(
                 "id",
                 "tenant.name",
-                "unit.unit_number",
+                "unit.unit_name",
                 "agreement_start_date",
                 "agreement_end_date",
                 "rent_amount",
@@ -54,7 +56,7 @@ class ContractController extends Controller
                 "created_at"
             )
             ->setColumnLabel("tenant.name", "Tenant Name")
-            ->setColumnLabel("unit.unit_number", "Unit Number")
+            ->setColumnLabel("unit.unit_name", "Unit Name")
             ->setColumnLabel("next_rent_due_date", "Next Due Date")
             ->setColumnDisplay(
                 'status',
@@ -70,16 +72,16 @@ class ContractController extends Controller
             ->setColumnSearchability("created_at", false);
 
 
-        $query = Contract::with(['tenant', 'unit']);
+        $query = UnitContracts::with(['tenant', 'unit']);
 
         if ($this->trash) {
             $query = $query->onlyTrashed();
 
-            $this->repository->setTableTitle("Contracts - Trashed")
+            $this->repository->setTableTitle("Unit Contracts - Trashed")
                 ->disableViewData("view")
                 ->enableViewData("export", "restore", "edit", "add", "list");
         } else {
-            $this->repository->setTableTitle("Contracts")
+            $this->repository->setTableTitle("Unit Contracts")
                 ->disableViewData("view")
                 ->enableViewData("export", "trash", "edit", "add", "trashList");
         }
@@ -99,55 +101,36 @@ class ContractController extends Controller
     }
     public function edit($id)
     {
-        $record = Contract::with(['tenant', 'unit'])->findOrFail($id);
+        $record = UnitContracts::with(['tenant', 'unit'])->findOrFail($id);
         return view('contracts.edit', compact('record'));
     }
 
     public function generateRentalPayments($model)
     {
         $contractId = $model->id ?? null;
-        $rentType = $model->rent_payment_type; // null:none, 1:monthly, 2:6months, 3:yearly
         $fullAmount = $model->full_amount;
         $rentAmount = $model->rent_amount;
         $nextDueDate = null;
         $totalInstallment = null;
+        $rentPaymentType = $model->rent_payment_type;
+        $durationInMonths = $model->duration_in_months;
 
-        // Calculate only if fullAmount is set and greater than 0
-        if ($fullAmount > 0) {
-            switch ($rentType) {
-                case 1: // Monthly
-                    $totalInstallment = ceil($fullAmount / $rentAmount);
-                    $nextDueDate = now()->addMonth();
-                    break;
-                case 2: // 6 Months
-                    $totalInstallment = ceil($fullAmount / $rentAmount);
-                    $nextDueDate = now()->addMonths(6);
-                    break;
-                case 3: // Yearly
-                    $totalInstallment = ceil($fullAmount / $rentAmount);
-                    $nextDueDate = now()->addYear();
-                    break;
-                default:
-                    $totalInstallment = 1;
-                    $nextDueDate = null;
-            }
-        }
+        $totalInstallment = ceil($fullAmount / $rentAmount);
+        $nextDueDate = now()->addMonth();
 
-        if ($fullAmount > 0 && $totalInstallment > 0 && $rentAmount > 0) {
+        if ($rentAmount > 0 && $rentPaymentType == 2) {
             $dueDate = now();
-            for ($i = 1; $i <= $totalInstallment; $i++) {
+            for ($i = 1; $i <= $durationInMonths; $i++) {
 
-                $payment = new Payments();
-                $payment->contract_id = $contractId;
+                $payment = new UnitPaymentSchedules();
+                $payment->unit_contract_id = $contractId;
+                $payment->unit_contract_id = $contractId;
                 $payment->installment_number = $i;
                 $payment->amount = $rentAmount;
-                $payment->payment_date = match ($rentType) {
-                    1 => $dueDate->copy()->addMonths($i - 1),
-                    2 => $dueDate->copy()->addMonths(6 * ($i - 1)),
-                    3 => $dueDate->copy()->addYears($i - 1),
-                    default => $dueDate
-                };
+                $payment->payment_date =  $dueDate->copy()->addMonths($i - 1);
+                $payment->is_rent = 1;
                 $payment->status = 0;
+                $payment->note = "Rent of installment_number " . $i;
                 $payment->save();
 
             }
@@ -175,14 +158,15 @@ class ContractController extends Controller
             'terms' => 'nullable|string',
         ]);
 
-        $record = new Contract();
+        $record = new UnitContracts();
         $record->tenant_id = $request->tenant_id;
         $record->unit_id = $request->unit_id;
         $record->agreement_start_date = $request->agreement_start_date;
         $record->agreement_end_date = $request->agreement_end_date;
         $record->rent_amount = $request->rent_amount;
         $record->deposit_amount = $request->deposit_amount;
-        $record->rent_payment_type = 1;
+        $record->rent_payment_type = 2;
+        $record->duration_in_months = 12;
         $record->full_amount = 10000.0;
         $record->terms = $request->terms;
         $record->save();
@@ -210,7 +194,7 @@ class ContractController extends Controller
 
     public function update($id, Request $request)
     {
-        $record = Contract::findOrFail($id);
+        $record = UnitContracts::findOrFail($id);
         $data = request()->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'unit_id' => 'required|exists:units,id',
@@ -237,7 +221,7 @@ class ContractController extends Controller
 
     public function delete($id)
     {
-        $record = Contract::findOrFail($id);
+        $record = UnitContracts::findOrFail($id);
         $record->delete();
 
         return response()->json("success");
@@ -245,7 +229,7 @@ class ContractController extends Controller
 
     public function restore($id)
     {
-        $record = Contract::withTrashed()->findOrFail($id);
+        $record = UnitContracts::withTrashed()->findOrFail($id);
         $record->restore();
 
         return response()->json("success");
@@ -254,7 +238,7 @@ class ContractController extends Controller
     public function searchData()
     {
         $search = request()->get('query');
-        $query = Contract::query();
+        $query = UnitContracts::query();
 
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');

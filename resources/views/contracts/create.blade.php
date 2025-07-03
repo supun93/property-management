@@ -11,10 +11,10 @@
       </div>
       <div class="col-sm-6">
         <div class="float-right">
-          <a href="{{ route('contract.index') }}" class="btn btn-info">
+          <a href="{{ route('unit-contracts.index') }}" class="btn btn-info">
             <span class="fa fa-list"></span> VIEW LIST
           </a>
-          <a href="{{ route('contract.trash-list') }}" class="btn btn-danger">
+          <a href="{{ route('unit-contracts.trash-list') }}" class="btn btn-danger">
             <span class="fa fa-trash"></span> VIEW TRASH
           </a>
         </div>
@@ -22,11 +22,11 @@
     </div>
   </div>
 
-  <form id="submitForm" method="POST" data-url="{{ route('contract.save') }}">
+  <form id="submitForm" method="POST" data-url="{{ route('unit-contracts.save') }}">
     @csrf
     <div class="card-body">
       <div class="form-group">
-        <label>Tenant<span class="text-danger">*</span></label>
+        <label>Tenant<span class="text-danger">*</span></label> 
         <input id="tenant_id" name="tenant_id" required />
       </div>
 
@@ -72,7 +72,7 @@
 
     <div class="card-footer">
       <button type="submit" class="btn btn-success">✅ Save</button>
-      <a href="{{ route('contract.index') }}" class="btn btn-secondary">↩️ Back</a>
+      <a href="{{ route('unit-contracts.index') }}" class="btn btn-secondary">↩️ Back</a>
     </div>
   </form>
 </div>

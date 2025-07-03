@@ -27,7 +27,7 @@ class UnitController extends Controller
         }
 
         $this->repository
-            ->setColumns("id", "unit_number", "property.name", "rent", "is_occupied", "created_at")
+            ->setColumns("id", "unit_name", "area_sqft", "property.name", "rent_amount", "created_at")
             ->setColumnLabel("property.name", "Property Name")
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
             ->setColumnSearchability("created_at", false);
@@ -69,16 +69,18 @@ class UnitController extends Controller
     public function save(Request $request)
     {
         $data = request()->validate([
-            'unit_number' => 'required|string|max:255',
-            'rent' => 'required|numeric|min:0',
-            'is_occupied' => 'required|boolean',
+            'unit_name' => 'required|string|max:255',
+            'rent_amount' => 'required|numeric|min:0',
+            'area_sqft' => 'required|numeric|min:0',
             'property_id' => 'required|exists:properties,id',
         ]);
         $record = new Unit();
-        $record->unit_number = $request->unit_number;
-        $record->rent = $request->rent;
+        $record->unit_name = $request->unit_name;
+        $record->rent_amount = $request->rent_amount;
         $record->is_occupied = $request->is_occupied;
         $record->property_id = $request->property_id;
+        $record->area_sqft = $request->area_sqft;
+        $record->floor = $request->floor;
         $record->save();
 
         return response()->json("success");
@@ -87,16 +89,18 @@ class UnitController extends Controller
     {
         $record = Unit::findOrFail($id);
         $data = request()->validate([
-            'unit_number' => 'required|string|max:255',
-            'rent' => 'required|numeric|min:0',
-            'is_occupied' => 'required|boolean',
+            'unit_name' => 'required|string|max:255',
+            'rent_amount' => 'required|numeric|min:0',
+            'area_sqft' => 'required|numeric|min:0',
             'property_id' => 'required|exists:properties,id',
         ]);
 
-        $record->unit_number = $request->unit_number;
-        $record->rent = $request->rent;
+        $record->unit_name = $request->unit_name;
+        $record->rent_amount = $request->rent_amount;
         $record->is_occupied = $request->is_occupied;
         $record->property_id = $request->property_id;
+        $record->area_sqft = $request->area_sqft;
+        $record->floor = $request->floor;
         $record->save();
 
         return response()->json("success");
@@ -124,15 +128,15 @@ class UnitController extends Controller
         $query = Unit::query();
 
         if ($search) {
-            $query->where('unit_number', 'like', '%' . $search . '%');
+            $query->where('unit_name', 'like', '%' . $search . '%');
         }
 
-        $records = $query->limit(10)->get(['id', 'unit_number']);
+        $records = $query->limit(10)->get(['id', 'unit_name']);
         $data = [];
         foreach ($records as $rec) {
             $row = [];
             $row["id"] = $rec->id;
-            $row["name"] = $rec->unit_number;
+            $row["name"] = $rec->unit_name;
             $data[] = $row;
         }
         return response()->json($data);

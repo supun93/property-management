@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('unit_payment_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('unit_contract_id')->constrained('unit_contracts')->onDelete('cascade')->nullable();
-            $table->foreignId('unit_billing_type_id')->constrained('unit_billing_types')->onDelete('cascade')->nullable();
+            $table->unsignedBigInteger('unit_billing_type_id')->nullable();
             $table->integer('is_rent')->default(0); // 1 = rent, 0 = other 
             $table->date('payment_date')->nullable();
             $table->decimal('amount', 10, 2)->nullable();
@@ -23,11 +23,17 @@ return new class extends Migration
             $table->integer("approval_status")->nullable();
             $table->string("approval_remarks")->nullable();
             $table->integer("installment_number")->nullable();
+            // 🔒 Audit
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade')->nullable();
-            $table->foreignId('updated_by')->constrained('users')->onDelete('cascade')->nullable();
-            $table->foreignId('deleted_by')->constrained('users')->onDelete('cascade')->nullable();
+
+            $table->foreign("created_by")->references("id")->on("users");
+            $table->foreign("updated_by")->references("id")->on("users");
+            $table->foreign("deleted_by")->references("id")->on("users");
+            $table->foreign("unit_billing_type_id")->references("id")->on("unit_billing_types");
         });
     }
 
