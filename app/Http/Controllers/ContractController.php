@@ -145,14 +145,15 @@ class ContractController extends Controller
             if($payment == null){
                 $payment = new UnitPaymentSchedules();
             }
-            
+           
             $payment->unit_contract_id = $contractId;
             $payment->unit_billing_type_id = $bType->id;
             $payment->amount = $rentAmount;
             $payment->payment_date =  $dueDate;
             $payment->status = 0;
-            $payment->note = $bType->billingType->name ?? '' . " - " . $dueDate;
+            $payment->note = $bType->billingType->name;
             $payment->save();
+
         }
 
         // Return or process as needed
