@@ -41,4 +41,9 @@ class Unit extends Model implements AuditableContract
     {
         return $this->hasOne(User::class, 'id', 'deleted_by');
     }
+
+    public function billingTypes()
+    {
+        return $this->hasMany(UnitBillingTypes::class, 'billing_type_id', 'id');
+    }
 }

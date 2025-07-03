@@ -46,4 +46,6 @@ class UnitContracts extends Model implements AuditableContract
     {
         return $this->hasOne(User::class, 'id', 'deleted_by');
     }
+
+    
 }

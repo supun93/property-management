@@ -107,6 +107,7 @@ class ContractController extends Controller
 
     public function generateRentalPayments($model)
     {
+        $billingTypes = $model->unit->billingTypes ?? [];
         $contractId = $model->id ?? null;
         $fullAmount = $model->full_amount;
         $rentAmount = $model->rent_amount;
@@ -124,7 +125,6 @@ class ContractController extends Controller
 
                 $payment = new UnitPaymentSchedules();
                 $payment->unit_contract_id = $contractId;
-                $payment->unit_contract_id = $contractId;
                 $payment->installment_number = $i;
                 $payment->amount = $rentAmount;
                 $payment->payment_date =  $dueDate->copy()->addMonths($i - 1);
@@ -134,6 +134,25 @@ class ContractController extends Controller
                 $payment->save();
 
             }
+        }
+
+        foreach($billingTypes as $bType){
+            $dueDate = now();
+            $payment = UnitPaymentSchedules::where("unit_contract_id", $contractId)
+                ->where("payment_date", $dueDate)
+                ->where("unit_billing_type_id", $bType->id)->first();
+
+            if($payment == null){
+                $payment = new UnitPaymentSchedules();
+            }
+            
+            $payment->unit_contract_id = $contractId;
+            $payment->unit_billing_type_id = $bType->id;
+            $payment->amount = $rentAmount;
+            $payment->payment_date =  $dueDate;
+            $payment->status = 0;
+            $payment->note = $bType->billingType->name ?? '' . " - " . $dueDate;
+            $payment->save();
         }
 
         // Return or process as needed
