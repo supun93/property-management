@@ -132,28 +132,28 @@ class ContractController extends Controller
                 $payment->status = 0;
                 $payment->note = "Rent of installment_number " . $i;
                 $payment->save();
-
             }
         }
 
-        foreach($billingTypes as $bType){
+        foreach ($billingTypes as $bType) {
             $dueDate = now();
             $payment = UnitPaymentSchedules::where("unit_contract_id", $contractId)
                 ->where("payment_date", $dueDate)
                 ->where("unit_billing_type_id", $bType->id)->first();
 
-            if($payment == null){
-                $payment = new UnitPaymentSchedules();
-            }
-           
-            $payment->unit_contract_id = $contractId;
-            $payment->unit_billing_type_id = $bType->id;
-            $payment->amount = $rentAmount;
-            $payment->payment_date =  $dueDate;
-            $payment->status = 0;
-            $payment->note = $bType->billingType->name;
-            $payment->save();
+            if (isset($bType->billingType->name)) {
+                if ($payment == null) {
+                    $payment = new UnitPaymentSchedules();
+                }
 
+                $payment->unit_contract_id = $contractId;
+                $payment->unit_billing_type_id = $bType->id;
+                $payment->amount = $rentAmount;
+                $payment->payment_date =  $dueDate;
+                $payment->status = 0;
+                $payment->note = $bType->billingType->name;
+                $payment->save();
+            }
         }
 
         // Return or process as needed
@@ -193,7 +193,7 @@ class ContractController extends Controller
 
         // Calculate rental payment fields
         $calc = $this->generateRentalPayments($record);
-        
+
         $record->rent_amount = $calc['rent_amount'];
         $record->total_installments = $calc['total_installments'];
         $record->next_rent_due_date = $calc['next_due_date'];
@@ -206,7 +206,7 @@ class ContractController extends Controller
             $record->total_paid_amount = $record->rent_amount;
         }
 
-        
+
         $record->save();
 
         return response()->json("success");
