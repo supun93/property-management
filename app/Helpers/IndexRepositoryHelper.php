@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Str;
 
@@ -27,6 +28,7 @@ class IndexRepositoryHelper
     protected $defaultOrderBy = null;
     protected $defaultOrderDir = 'desc';
     protected $template;
+    protected $customFilters = [];
 
     public function __construct(Model $model)
     {
@@ -34,7 +36,56 @@ class IndexRepositoryHelper
         $this->defaultOrderBy = 'id';
         $this->defaultOrderDir = 'desc';
     }
+    public function addFilter(string $name, string $label, string $type = 'select', array $options = [])
+    {
+        $this->customFilters[] = compact('name', 'label', 'type', 'options');
+        return $this;
+    }
+    protected function applyCustomFilters(Builder $query)
+    {
+        foreach ($this->customFilters as $filter) {
+            $name = $filter['name'];
+            $value = request($name);
+            $type = $filter['type'] ?? 'select';
 
+            if ($value === null || $value === '') continue;
+
+            // Range filters
+            if (Str::endsWith($name, '_from')) {
+                $column = Str::replaceLast('_from', '', $name);
+                $query->whereDate($column, '>=', $value);
+            } elseif (Str::endsWith($name, '_to')) {
+                $column = Str::replaceLast('_to', '', $name);
+                $query->whereDate($column, '<=', $value);
+            }
+
+            // Dot-notation handling
+            elseif (Str::contains($name, '.')) {
+                $parts = explode('.', $name);
+                $field = array_pop($parts);
+                $relation = implode('.', $parts);
+
+                $query->whereHas($relation, function ($q) use ($field, $value, $type) {
+                    if ($type === 'text') {
+                        $q->where($field, 'like', "%{$value}%");
+                    } else {
+                        $q->where($field, $value);
+                    }
+                });
+            }
+
+            // Direct field
+            else {
+                if ($type === 'text') {
+                    $query->where($name, 'like', "%{$value}%");
+                } else {
+                    $query->where($name, $value);
+                }
+            }
+        }
+
+        return $query;
+    }
     public function displayStatusAs($value, $statuses = [], $defaultLabel = '', $showChip = true)
     {
         // $matched = collect($statuses)->firstWhere('id', $value); dont use firstWhere because when value is 0, its show null
@@ -139,6 +190,8 @@ class IndexRepositoryHelper
 
     public function index(Builder $query)
     {
+        $query = $this->applyCustomFilters($query);
+
         if (request()->ajax()) {
             return $this->buildAjaxDataTable($query);
         }
@@ -154,11 +207,15 @@ class IndexRepositoryHelper
             'tableTitle' => $this->tableTitle,
             'viewData' => $this->viewData,
             'model' => $this->model,
+            'customFilters' => $this->customFilters, // 👈 pass to blade
+            "orderByDir" => $this->defaultOrderDir
         ]);
     }
 
     public function buildAjaxDataTable(Builder $query)
     {
+        $query = $this->applyCustomFilters($query);
+       
         if ($this->defaultOrderBy && !request()->has('order')) {
             $query->orderBy($this->defaultOrderBy, $this->defaultOrderDir);
         }

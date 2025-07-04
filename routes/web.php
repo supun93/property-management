@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\UnitBillingTypesController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,20 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('trash/{id}', [ContractController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [ContractController::class, 'restore'])->name('restore');
         Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('payments')->name('unit-payment-schedules.')->group(function () {
+        Route::get('', [UnitPaymentController::class, 'index'])->name('index');
+        Route::post('', [UnitPaymentController::class, 'index']);
+        Route::get('trash-list', [UnitPaymentController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [UnitPaymentController::class, 'trash']);
+        Route::get('create', [UnitPaymentController::class, 'create'])->name('create');
+        Route::post('save', [UnitPaymentController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [UnitPaymentController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [UnitPaymentController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [UnitPaymentController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [UnitPaymentController::class, 'restore'])->name('restore');
+        Route::post('search_data', [UnitPaymentController::class, 'searchData'])->name('search_data');
     });
 
     Route::prefix('property-category')->name('property-category.')->group(function () {

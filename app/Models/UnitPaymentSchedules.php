@@ -26,7 +26,7 @@ class UnitPaymentSchedules extends Model implements AuditableContract
 
     public function contract()
     {
-        return $this->hasOne(UnitContracts::class, 'id', 'contract_id');
+        return $this->hasOne(UnitContracts::class, 'id', 'unit_contract_id');
     }
 
     public function unitBillingType()

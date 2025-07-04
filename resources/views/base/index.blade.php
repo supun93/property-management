@@ -59,8 +59,8 @@
                     <a href="{{ route(Str::kebab(class_basename($model)) . '.index') }}" class="btn btn-info">
                         <span class="fa fa-list"></span> VIEW LIST
                     </a>
-                    @else 
-                    
+                    @else
+
                     <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list') }}" class="btn btn-danger">
                         🗑️ VIEW TRASH
                     </a>
@@ -70,6 +70,32 @@
         </div>
     </div>
     <div class="card-body">
+        @if(!empty($customFilters))
+        <form method="POST" id="filterForm" class="row mb-3">
+            @foreach($customFilters as $filter)
+            <div class="col-md-2">
+                <label>{{ $filter['label'] }}</label>
+                @if($filter['type'] === 'select')
+                <select name="{{ $filter['name'] }}" class="form-control" id="{{ $filter['name'] }}">
+                    <option value="">-- All --</option>
+                    @foreach($filter['options'] as $key => $label)
+                    <option value="{{ $key }}">
+                        {{ $label }}
+                    </option>
+                    @endforeach
+                </select>
+                @elseif($filter['type'] === 'text')
+                <input type="text" name="{{ $filter['name'] }}" value="{{ request($filter['name']) }}" class="form-control" />
+                @elseif($filter['type'] === 'date')
+                <input type="date" name="{{ $filter['name'] }}" value="{{ request($filter['name']) }}" class="form-control" />
+                @endif
+            </div>
+            @endforeach
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+        @endif
         <table id="main-table" class="table table-bordered table-striped">
             <thead>
                 <tr>
@@ -92,13 +118,17 @@
             serverSide: true,
             deferRender: true,
             order: [
-                [0, 'desc']
+                [0, "{{$orderByDir}}"]
             ],
             ajax: {
                 url: '{{ url()->current() }}',
                 type: 'POST',
                 data: function(d) {
                     d._token = '{{ csrf_token() }}'; // CSRF token required for POST
+                    $('#filterForm').serializeArray().forEach(function(input) {
+                        d[input.name] = input.value;
+                    });
+
                 }
             },
             columns: [
@@ -188,6 +218,12 @@
                 cancel: function() {}
             }
         });
+    });
+
+    $(document).on('submit', '#filterForm', function(e) {
+        e.preventDefault();
+        var url = $(this).data('url');
+        $('#main-table').DataTable().ajax.reload();
     });
 </script>
 @endsection
