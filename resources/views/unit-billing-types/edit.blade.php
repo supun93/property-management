@@ -108,14 +108,14 @@
         if (unitBox.getData().length > 0) {
           clearInterval(interval);
           unitBox.setValue([{
-            id: {{ $record->unit_id ?? 'null' }},
+            id: "{{ $record->unit_id ?? 'null' }}",
             name: "{{ $record->unit->unit_name ?? '' }}"
           }]);
         }
         if (billingTypeBox.getData().length > 0) {
           clearInterval(interval);
           billingTypeBox.setValue([{
-            id: {{ $record->billing_type_id ?? 'null' }},
+            id: "{{ $record->billing_type_id ?? 'null' }}",
             name: "{{ $record->billingType->name ?? '' }}"
           }]);
         }

@@ -99,7 +99,7 @@
 
           // Set owner
           userBox.setValue([{
-            id: {{ $tenant->user_id ?? 'null' }},
+            id: "{{ $tenant->user_id ?? 'null' }}",
             name: "{{ $tenant->user->name ?? '' }}"
           }]);
         }

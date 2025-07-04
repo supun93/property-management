@@ -97,21 +97,13 @@
 
           // Set category
           categoryBox.setValue([{
-            id: {
-              {
-                $record - > category_id ?? 'null'
-              }
-            },
+            id: "{{ $record->category_id ?? 'null' }}",
             name: "{{ $record->category->name ?? '' }}"
           }]);
 
           // Set owner
           ownerBox.setValue([{
-            id: {
-              {
-                $record - > owner_id ?? 'null'
-              }
-            },
+            id: "{{ $record->owner_id ?? 'null' }}",
             name: "{{ $record->owner->name ?? '' }}"
           }]);
         }

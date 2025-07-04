@@ -86,7 +86,7 @@
         if (propertyBox.getData().length > 0) {
           clearInterval(interval);
           propertyBox.setValue([{
-            id: {{ $record->property_id ?? 'null' }},
+            id: "{{ $record->property_id ?? 'null' }}",
             name: "{{ $record->property->name ?? '' }}"
           }]);
         }

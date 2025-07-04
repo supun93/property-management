@@ -92,7 +92,7 @@
         }
       },
       data: "{{ route('unit.search_data') }}",
-      value: [{{ $record->unit_id }}]
+      value: ["{{ $record->unit_id }}"]
     });
 
     const tenantBox = $('#tenant_id').magicSuggest({
@@ -107,7 +107,7 @@
         }
       },
       data: "{{ route('tenants.search_data') }}",
-      value: [{{ $record->tenant_id }}]
+      value: ["{{ $record->tenant_id }}"]
     });
 
     setTimeout(() => {
