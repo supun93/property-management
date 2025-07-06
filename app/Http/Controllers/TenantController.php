@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Helpers\IndexRepositoryHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Tenants;
+use App\Models\UnitContracts;
+use App\Models\UnitPaymentSchedules;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TenantController extends Controller
 {
@@ -165,5 +169,73 @@ class TenantController extends Controller
         $records = $query->limit(10)->get(['id', 'name']);
 
         return response()->json($records);
+    }
+
+    public function dashboard(Request $request)
+    {
+        $user = Auth::user();
+        $tenant = Tenants::where('user_id', $user->id)->first();
+
+        if (!$tenant) {
+            abort(403, "No tenant profile found.");
+        }
+
+        $contract = UnitContracts::with(['unit', 'unit.property'])
+            ->where('tenant_id', $tenant->id)
+            ->latest('id')
+            ->first();
+
+        $invoices = collect();
+        $pendingRentPayments = collect();
+        $paidRentPayments = collect();
+        $pendingUtilityPayments = collect();
+        $paidUtilityPayments = collect();
+
+        if ($contract) {
+            // 🔶 Pending Rent Payments
+            $pendingRentPayments = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
+                ->where('is_rent', 1)
+                ->whereIn('status', [0, 2]) // PENDING
+                ->orderBy('payment_date', 'asc')->limit(5)
+                ->get();
+
+            // ✅ Paid Rent Payments
+            $paidRentPayments = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
+                ->where('is_rent', 1)
+                ->where('status', 1) // PAID
+                ->orderBy('payment_date', 'desc')
+                ->get();
+
+            // 🔶 Pending Utilities
+            $pendingUtilityPayments = UnitPaymentSchedules::with('unitBillingType.billingType')
+                ->where('unit_contract_id', $contract->id)
+                ->where('is_rent', 0)
+                ->whereIn('status', [0, 2]) // PENDING
+                ->orderBy('payment_date', 'asc')
+                ->get();
+
+            // ✅ Paid Utilities
+            $paidUtilityPayments = UnitPaymentSchedules::with('unitBillingType.billingType')
+                ->where('unit_contract_id', $contract->id)
+                ->where('is_rent', 0)
+                ->where('status', 1) // PAID
+                ->orderBy('payment_date', 'desc')
+                ->get();
+        }
+
+        // 📄 Invoice History
+        $invoices = Invoice::where('tenant_id', $tenant->id)
+            ->orderByDesc('payment_date')
+            ->paginate(5, ['*'], 'invoice_page');
+
+        return view('tenant.dashboard', compact(
+            'tenant',
+            'contract',
+            'invoices',
+            'pendingRentPayments',
+            'paidRentPayments',
+            'pendingUtilityPayments',
+            'paidUtilityPayments'
+        ));
     }
 }

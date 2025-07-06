@@ -21,6 +21,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::get('', [TenantController::class, 'dashboard'])->name('dashboard');
 });
 
 Route::group(['middleware' => 'is_manager'], function () {
@@ -181,7 +183,6 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('restore/{id}', [UserController::class, 'restore'])->name('restore');
         Route::post('search_data', [UserController::class, 'searchData'])->name('search_data');
     });
-
 });
 
 

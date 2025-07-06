@@ -25,7 +25,7 @@ class UnitPaymentController extends Controller
     public $statuses = [
         'Active' => ['id' => 1, 'label' => 'Paid', 'class' => 'success'],
         'Pending' => ['id' => 0, 'label' => 'Pending', 'class' => 'warning'],
-        'Terminated' => ['id' => 2, 'label' => 'Pending Verification', 'class' => 'info'],
+        'Pending Verification' => ['id' => 2, 'label' => 'Pending Verification', 'class' => 'info'],
     ];
 
     public function index($id, Request $request)
@@ -72,7 +72,7 @@ class UnitPaymentController extends Controller
             ->setExtraListButtonUrl(route("invoice.index", $id))
             ->setExtraListButtonLabel("VIEW INVOICES");
 
-        
+
         $query = UnitPaymentSchedules::with([
             'contract',                 // 🟢 for unit_id
             'contract.unit',            // 🟢 for displaying unit info
@@ -139,8 +139,10 @@ class UnitPaymentController extends Controller
         $payment->approval_remarks = $request['approval_remarks'];
         $payment->status = $validated['status'];
         if ($validated['status'] == 1) {
+            $payment->status_enum = "PAID";
             $payment->paid_at = Carbon::now();
         } else {
+            $payment->status_enum = "PENDING";
             $payment->paid_at = null;
         }
 
