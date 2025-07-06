@@ -91,12 +91,12 @@ class UnitPaymentController extends Controller
             $query = $query->onlyTrashed();
 
             $this->repository->setTableTitle($contract->unit->unit_name . " | Unit Payments - Trashed")
-                ->disableViewData("view")
-                ->enableViewData("export", "restore", "edit", "add", "list");
+                ->disableViewData("view", "restore", "add", "trashList")
+                ->enableViewData("export", "edit");
         } else {
             $this->repository->setTableTitle($contract->unit->unit_name . " | Unit Payments")
-                ->disableViewData("view")
-                ->enableViewData("export", "trash", "edit", "add", "trashList");
+                ->disableViewData("view", "trash", "add", "trashList")
+                ->enableViewData("export", "edit");
         }
 
         return $this->repository->render("layouts.master")->index($query);

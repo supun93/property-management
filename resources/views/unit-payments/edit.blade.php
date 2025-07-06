@@ -33,7 +33,7 @@
 
       <div class="form-group">
         <label>Amount</label>
-        <input type="number" step="0.01" name="amount" value="{{ $record->amount }}" class="form-control" required readonly>
+        <input type="number" step="0.01" name="amount" value="{{ $record->amount }}" placeholder="0.00" class="form-control" required @if($record->is_rent) readonly @endif>
       </div>
 
       @if($record->is_rent)

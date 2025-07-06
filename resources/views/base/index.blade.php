@@ -65,7 +65,7 @@
                         <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info">
                             <span class="fa fa-list"></span> VIEW LIST
                         </a>
-                    @else
+                    @elseif($viewData["trashList"])
 
                         <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger">
                             🗑️ VIEW TRASH

@@ -46,13 +46,32 @@
       </div>
 
       <div class="form-group">
-        <label>Rent Amount</label>
-        <input type="number" step="0.01" name="rent_amount" value="{{ $record->rent_amount }}" class="form-control">
+        <label>Payment Type</label>
+        <select name="rent_payment_type" class="form-control" required id="rent_payment_type">
+          <option value="">Select</option>
+          <option value="1" @if($record->rent_payment_type == 1) selected @endif>Full Payment</option>
+          <option value="2" @if($record->rent_payment_type == 2) selected @endif>Installment</option>
+        </select>
       </div>
 
-      <div class="form-group">
+      <div class="form-group full_amount" style="display:none">
+        <label>Full Amount</label>
+        <input type="number" step="0.01" name="full_amount" id="full_amount_value" class="form-control" placeholder="Enter Full Amount" value="{{ $record->full_amount }}">
+      </div>
+
+      <div class="form-group Installment" style="display:none">
+        <label>Rent Amount</label>
+        <input type="number" step="0.01" name="rent_amount" class="form-control" placeholder="Enter rent" value="{{ $record->rent_amount }}">
+      </div>
+
+      <div class="form-group Installment" style="display:none">
         <label>Deposit Amount</label>
-        <input type="number" step="0.01" name="deposit_amount" value="{{ $record->deposit_amount }}" class="form-control">
+        <input type="number" step="0.01" name="deposit_amount" class="form-control" placeholder="Enter Deposit" value="{{ $record->deposit_amount }}">
+      </div>
+
+      <div class="form-group Installment" style="display:none">
+        <label>Duration In Months</label>
+        <input type="number" step="0.01" name="duration_in_months" id="duration_in_months_value" class="form-control" placeholder="Enter Duration In Months" value="{{ $record->duration_in_months }}">
       </div>
 
       <div class="form-group">
@@ -117,6 +136,23 @@
       });
     }, 300);
 
+    $('#rent_payment_type').on('change', function(e) {
+      e.preventDefault();
+      var value = $(this).val();
+
+      if (value == 1) {
+        $(".Installment").hide();
+        $(".full_amount").show();
+      } else if (value == 2) {
+        $(".full_amount").hide();
+        $(".Installment").show();
+      } else {
+        $(".full_amount").hide();
+        $(".Installment").hide();
+      }
+
+    });
+
     $('#submitForm').on('submit', function (e) {
       e.preventDefault();
       const url = $(this).data('url');
@@ -125,6 +161,16 @@
 
       if (!unitVal || !tenantVal) {
         alert('Please select both Tenant and Unit');
+        return;
+      }
+
+       if ($("#rent_payment_type").val() == 1 && ($("#full_amount_value").val() == "" || $("#full_amount_value").val() == 0)) {
+        alert('Please enter valid full amount');
+        return;
+      }
+
+      if ($("#rent_payment_type").val() == 2 && ($("#duration_in_months_value").val() == "" || $("#duration_in_months_value").val() == 0)) {
+        alert('Please enter valid duration in months');
         return;
       }
 

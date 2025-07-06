@@ -20,11 +20,20 @@ $isManager = auth()->check() && auth()->user()->role === 2;
         </li>
 
         @if($isManager || $isAdmin)
-          {{-- Property Category --}}
+
+          {{-- Billing Types --}}
           <li class="nav-item">
             <a href="{{ route('billing-types.index') }}" class="nav-link">
               <i class="nav-icon fas fa-tags"></i>
               <p>Billing Types</p>
+            </a>
+          </li>
+
+          {{-- Property Category --}}
+          <li class="nav-item">
+            <a href="{{ route('property-category.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-tags"></i>
+              <p>Property Category</p>
             </a>
           </li>
 
