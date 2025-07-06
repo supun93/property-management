@@ -67,9 +67,12 @@ class UnitPaymentController extends Controller
             ->addFilter('unit_billing_type_id', 'Billing Type', 'select', BillingTypes::pluck('name', 'id')->toArray())
             ->addFilter('payment_date_from', 'From Date', 'date') // ✅ added
             ->addFilter('payment_date_to', 'To Date', 'date')     // ✅ added
-            ->setDefaultOrder('payment_date', 'asc')->setRefferanceId($id);
+            ->setDefaultOrder('payment_date', 'asc')
+            ->setRefferanceId($id)
+            ->setExtraListButtonUrl(route("invoice.index", $id))
+            ->setExtraListButtonLabel("VIEW INVOICES");
 
-
+        
         $query = UnitPaymentSchedules::with([
             'contract',                 // 🟢 for unit_id
             'contract.unit',            // 🟢 for displaying unit info
@@ -133,6 +136,7 @@ class UnitPaymentController extends Controller
         $payment->amount = $validated['amount'];
         $payment->installment_number = $validated['installment_number'] ?? null;
         $payment->note = $validated['note'] ?? null;
+        $payment->approval_remarks = $request['approval_remarks'];
         $payment->status = $validated['status'];
         if ($validated['status'] == 1) {
             $payment->paid_at = Carbon::now();

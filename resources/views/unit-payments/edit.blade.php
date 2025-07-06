@@ -28,24 +28,28 @@
 
       <div class="form-group">
         <label>Payment Date</label>
-        <input type="date" name="payment_date" value="{{ $record->payment_date }}" class="form-control" required>
+        <input type="date" name="payment_date" value="{{ $record->payment_date }}" class="form-control" required readonly>
       </div>
 
       <div class="form-group">
         <label>Amount</label>
-        <input type="number" step="0.01" name="amount" value="{{ $record->amount }}" class="form-control" required>
+        <input type="number" step="0.01" name="amount" value="{{ $record->amount }}" class="form-control" required readonly>
       </div>
 
+      @if($record->is_rent)
       <div class="form-group">
         <label>Installment Number</label>
-        <input type="number" name="installment_number" value="{{ $record->installment_number }}" class="form-control">
+        <input type="number" name="installment_number" value="{{ $record->installment_number }}" class="form-control" readonly>
       </div>
-
+      @endif
       <div class="form-group">
         <label>Note</label>
-        <input type="text" name="note" value="{{ $record->note }}" class="form-control">
+        <input type="text" name="note" value="{{ $record->note }}" class="form-control" readonly>
       </div>
-
+      <div class="form-group">
+        <label>Remarks</label>
+        <textarea name="approval_remarks" class="form-control" rows="3" placeholder="Remarks">{{ $record->approval_remarks }}</textarea>
+      </div>
       <div class="form-group">
         <label>Status</label>
         <select name="status" class="form-control">
@@ -65,8 +69,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.js"></script>
 <script>
-  $(document).ready(function () { 
-    $('#submitForm').on('submit', function (e) {
+  $(document).ready(function() {
+    $('#submitForm').on('submit', function(e) {
       e.preventDefault();
       const url = $(this).data('url');
       const formData = $(this).serialize();

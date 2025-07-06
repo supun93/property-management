@@ -138,17 +138,17 @@ Route::group(['middleware' => 'is_manager'], function () {
     });
 
     Route::prefix('invoices')->name('invoice.')->group(function () {
-        Route::get('', [InvoiceController::class, 'index'])->name('index');
-        Route::post('', [InvoiceController::class, 'index']);
-        Route::get('trash-list', [InvoiceController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [InvoiceController::class, 'trash']);
-        Route::get('create', [InvoiceController::class, 'create'])->name('create');
-        Route::post('save', [InvoiceController::class, 'save'])->name('save');
+        Route::get('{id}', [InvoiceController::class, 'index'])->name('index');
+        Route::post('{id}', [InvoiceController::class, 'index']);
+        Route::get('trash-list/{id}', [InvoiceController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list/{id}', [InvoiceController::class, 'trash']);
+        Route::get('create/{id}', [InvoiceController::class, 'create'])->name('create');
+        Route::post('save/{id}', [InvoiceController::class, 'save'])->name('save');
         Route::get('edit/{id}', [InvoiceController::class, 'edit'])->name('edit');
         Route::post('update/{id}', [InvoiceController::class, 'update'])->name('update');
         Route::post('trash/{id}', [InvoiceController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [InvoiceController::class, 'restore'])->name('restore');
-        Route::post('search_data', [InvoiceController::class, 'searchData'])->name('search_data');
+        Route::post('search_data/{id}', [InvoiceController::class, 'searchData'])->name('search_data');
     });
 
     Route::prefix('invoice_lines')->name('invoice_lines.')->group(function () {

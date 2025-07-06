@@ -24,6 +24,11 @@ class Invoice extends Model implements AuditableContract
         'deleted_at' => 'datetime:Y-m-d H:i:s'
     ];
 
+    public function contract()
+    {
+        return $this->hasOne(UnitContracts::class, 'id', 'contract_id');
+    }
+
     public function createdBy()
     {
         return $this->hasOne(User::class, 'id', 'created_by');

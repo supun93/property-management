@@ -55,19 +55,26 @@
             </div>
             <div class="col-sm-6">
                 <div class="float-right">
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info">
-                        <span class="fa fa-plus"></span> ADD NEW
-                    </a>
+                    @if($viewData["add"])
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info">
+                            <span class="fa fa-plus"></span> ADD NEW
+                        </a>
+                    @endif
 
                     @if(Str::contains($tableTitle, 'Trash'))
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info">
-                        <span class="fa fa-list"></span> VIEW LIST
-                    </a>
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info">
+                            <span class="fa fa-list"></span> VIEW LIST
+                        </a>
                     @else
 
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger">
-                        🗑️ VIEW TRASH
-                    </a>
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger">
+                            🗑️ VIEW TRASH
+                        </a>
+                    @endif
+                    @if($extraListButtonUrl)
+                        <a href="{{ $extraListButtonUrl }}" class="btn btn-info">
+                            <span class="fa fa-list"></span> {{ $extraListButtonLabel }}
+                        </a>
                     @endif
                 </div>
             </div>

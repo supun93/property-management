@@ -24,7 +24,7 @@ class InvoiceController extends BaseController
         'inactive' => ['id' => 0, 'label' => 'Inactive', 'class' => 'danger']
     ];
 
-    public function index(Request $request)
+    public function index($id, Request $request)
     {
         if ($this->trash) {
             $this->repository->setPageTitle("Invoice - Trashed");
@@ -39,31 +39,33 @@ class InvoiceController extends BaseController
                 'status',
                 [$this->repository, 'displayStatusAs'],
                 [$this->statuses, '', true] // ✅ 3rd param: pass statuses + showChip true
-            )
+            )->setRefferanceId($id)
+            ->setExtraListButtonUrl(route("unit-payment-schedules.index", $id))
+            ->setExtraListButtonLabel("VIEW PAYMENTS")
             ->setColumnSearchability("created_at", false);
 
 
-        $query = Invoice::query(); // remove createdBy
+        $query = Invoice::where("contract_id", $id); // remove createdBy
 
         if ($this->trash) {
             $query = $query->onlyTrashed();
 
             $this->repository->setTableTitle("Invoice - Trashed")
-                ->disableViewData("view")
-                ->enableViewData("export", "restore", "edit", "add", "list");
+                ->disableViewData("view", "add")
+                ->enableViewData("export", "restore", "edit", "list");
         } else {
             $this->repository->setTableTitle("Invoice")
-                ->disableViewData("view")
-                ->enableViewData("export", "trash", "edit", "add", "trashList");
+                ->disableViewData("view", 'add')
+                ->enableViewData("export", "trash", "edit", "trashList");
         }
 
         return $this->repository->render("layouts.master")->index($query);
     }
 
-    public function trash(Request $request)
+    public function trash($id, Request $request)
     {
         $this->trash = true;
-        return $this->index($request);
+        return $this->index($id, $request);
     }
 
     public function create()
@@ -85,7 +87,7 @@ class InvoiceController extends BaseController
         return view('invoices.edit', compact('record'));
     }
 
-    public function save(Request $request)
+    public function save($id, Request $request)
     {
         $data = request()->validate([
             'name' => 'required|string|max:255',
@@ -127,7 +129,7 @@ class InvoiceController extends BaseController
         return response()->json("success");
     }
 
-    public function searchData()
+    public function searchData($id)
     {
         $search = request()->get('query');
         $query = Invoice::query();

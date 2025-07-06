@@ -16,6 +16,8 @@ class IndexRepositoryHelper
     public $columnSearchability = [];
     public $pageTitle = '';
     public $tableTitle = '';
+    public $extraListButtonUrl = '';
+    public $extraListButtonLabel = '';
     public $refId = '';
     public $viewData = [
         'view' => true,
@@ -216,6 +218,18 @@ class IndexRepositoryHelper
         return $this;
     }
 
+    public function setExtraListButtonLabel($label)
+    {
+        $this->extraListButtonLabel = $label;
+        return $this;
+    }
+
+    public function setExtraListButtonUrl($url)
+    {
+        $this->extraListButtonUrl = $url;
+        return $this;
+    }
+
     public function setRefferanceId($rfId)
     {
         $this->refId = $rfId;
@@ -272,7 +286,9 @@ class IndexRepositoryHelper
             'model' => $this->model,
             'customFilters' => $this->customFilters,
             "orderByDir" => $this->defaultOrderDir,
-            "refId" => $this->refId
+            "refId" => $this->refId,
+            "extraListButtonUrl" => $this->extraListButtonUrl,
+            "extraListButtonLabel" => $this->extraListButtonLabel
         ]);
     }
 
