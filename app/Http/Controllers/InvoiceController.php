@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UnitBillingTypes;
+use App\Models\Invoice;
 use App\Helpers\IndexRepositoryHelper;
-use App\Models\Unit;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
-class UnitBillingTypesController extends BaseController
+class InvoiceController extends BaseController
 {
     protected $repository;
     protected $trash;
@@ -16,7 +16,7 @@ class UnitBillingTypesController extends BaseController
     public function __construct()
     {
         $this->trash = request()->has('trash');
-        $this->repository = new IndexRepositoryHelper(new UnitBillingTypes());
+        $this->repository = new IndexRepositoryHelper(new Invoice());
     }
 
     public $statuses = [
@@ -24,89 +24,87 @@ class UnitBillingTypesController extends BaseController
         'inactive' => ['id' => 0, 'label' => 'Inactive', 'class' => 'danger']
     ];
 
-    public function index($id, Request $request)
+    public function index(Request $request)
     {
-        $unit = Unit::find($id);
-        if($unit == null){
-            abort(403, "Invalid Unit");
-
-        }
         if ($this->trash) {
-            $this->repository->setPageTitle("Unit Billing Types - Trashed | " . $unit->unit_name);
+            $this->repository->setPageTitle("Invoice - Trashed");
         } else {
-            $this->repository->setPageTitle("Unit Billing Types | " . $unit->unit_name);
+            $this->repository->setPageTitle("Invoice");
         }
 
         $this->repository
-            ->setColumns("id", "unit.unit_name", "billingType.name", "status", "created_at")
-            ->setColumnLabel("unit.unit_name", "Unit Name")
-            ->setColumnLabel("billingType.name", "Billing Type Name")
+            ->setColumns("id", "name", "status", "created_at")
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
             ->setColumnDisplay(
                 'status',
                 [$this->repository, 'displayStatusAs'],
                 [$this->statuses, '', true] // ✅ 3rd param: pass statuses + showChip true
             )
-            ->setColumnSearchability("created_at", false)->setRefferanceId($id);
+            ->setColumnSearchability("created_at", false);
 
-       $query = UnitBillingTypes::where("unit_id", $id);
+
+        $query = Invoice::query(); // remove createdBy
 
         if ($this->trash) {
             $query = $query->onlyTrashed();
 
-            $this->repository->setTableTitle("Unit Billing Types - Trashed | " . $unit->unit_name)
+            $this->repository->setTableTitle("Invoice - Trashed")
                 ->disableViewData("view")
                 ->enableViewData("export", "restore", "edit", "add", "list");
         } else {
-            $this->repository->setTableTitle("Unit Billing Types | " . $unit->unit_name)
+            $this->repository->setTableTitle("Invoice")
                 ->disableViewData("view")
                 ->enableViewData("export", "trash", "edit", "add", "trashList");
         }
-        
+
         return $this->repository->render("layouts.master")->index($query);
     }
 
-    public function trash($id, Request $request)
+    public function trash(Request $request)
     {
         $this->trash = true;
-        return $this->index($id, $request);
+        return $this->index($request);
     }
 
-    public function create($id)
+    public function create()
     {
-        return view('unit-billing-types.create', compact('id'));
+        return view('invoices.create');
     }
     public function edit($id)
     {
-        $record = UnitBillingTypes::findOrFail($id);
-        return view('unit-billing-types.edit', compact('record'));
+
+        $invoice = Invoice::findOrFail($id);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('invoices.pdf', compact('invoice'));
+
+        return $pdf->download("Invoice-{$invoice->id}.pdf");
+
+
+        $record = Invoice::findOrFail($id);
+        return view('invoices.edit', compact('record'));
     }
 
-    public function save($id, Request $request)
+    public function save(Request $request)
     {
         $data = request()->validate([
-            'unit_id' => 'required|exists:units,id',
-            'billing_type_id' => 'required|exists:billing_types,id',
+            'name' => 'required|string|max:255',
         ]);
 
-        $record = new UnitBillingTypes();
-        $record->unit_id = $id;
-        $record->billing_type_id = $request->billing_type_id;
+        $record = new Invoice();
+        $record->name = $request->name;
         $record->save();
 
         return response()->json("success");
     }
-
     public function update($id, Request $request)
     {
-        $record = UnitBillingTypes::findOrFail($id);
+        $record = Invoice::findOrFail($id);
         $data = request()->validate([
-            'unit_id' => 'required|exists:units,id',
-            'billing_type_id' => 'required|exists:billing_types,id',
+            'name' => 'required|string|max:255',
         ]);
 
-        $record->unit_id = $request->unit_id;
-        $record->billing_type_id = $request->billing_type_id;
+        $record->name = $request->name;
         $record->status = $request->status;
         $record->save();
 
@@ -115,7 +113,7 @@ class UnitBillingTypesController extends BaseController
 
     public function delete($id)
     {
-        $record = UnitBillingTypes::findOrFail($id);
+        $record = Invoice::findOrFail($id);
         $record->delete();
 
         return response()->json("success");
@@ -123,16 +121,16 @@ class UnitBillingTypesController extends BaseController
 
     public function restore($id)
     {
-        $record = UnitBillingTypes::withTrashed()->findOrFail($id);
+        $record = Invoice::withTrashed()->findOrFail($id);
         $record->restore();
 
         return response()->json("success");
     }
 
-    public function searchData($id)
+    public function searchData()
     {
         $search = request()->get('query');
-        $query = UnitBillingTypes::query();
+        $query = Invoice::query();
 
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');

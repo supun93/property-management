@@ -5,9 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\UnitContracts;
 use App\Models\UnitPaymentSchedules;
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class GenerateMonthlyRents extends Command
 {
@@ -16,38 +14,39 @@ class GenerateMonthlyRents extends Command
 
     public function handle()
     {
-        $today = Carbon::today();
         $generated = 0;
-        $user = User::find(1);
-        if($user){
-            $user->name = time();
-            $user->save();
-        }
-        $contracts = UnitContracts::where('status', 1)
-            ->whereDate('agreement_start_date', '<=', $today)
-            ->whereDate('agreement_end_date', '>=', $today)
+        $now = Carbon::now()->startOfMonth();
+
+        $contracts = UnitContracts::with('unit.billingTypes.billingType')
+            ->where('status', 1)
             ->get();
 
         foreach ($contracts as $contract) {
-            $alreadyExists = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
-                ->where('is_rent', 1)
-                ->whereMonth('payment_date', $today->month)
-                ->whereYear('payment_date', $today->year)
-                ->exists();
+            if (!$contract->unit || !$contract->unit->billingTypes) {
+                continue;
+            }
 
-            if ($alreadyExists) continue;
+            foreach ($contract->unit->billingTypes as $bType) {
+                $exists = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
+                    ->where('unit_billing_type_id', $bType->id)
+                    ->whereMonth('payment_date', $now->month)
+                    ->whereYear('payment_date', $now->year)
+                    ->exists();
 
-            UnitPaymentSchedules::create([
-                'unit_contract_id' => $contract->id,
-                'is_rent' => 1,
-                'payment_date' => $today->format('Y-m-d'),
-                'amount' => $contract->rent_amount,
-                'note' => 'Auto-generated rent for ' . $today->format('F Y'),
-                'status' => 0,
-                'created_by' => 1 // Or Auth::id() if running interactively
-            ]);
+                if (!$exists) {
+                    UnitPaymentSchedules::create([
+                        'unit_contract_id'      => $contract->id,
+                        'unit_billing_type_id'  => $bType->id,
+                        'payment_date'          => $now->copy(),
+                        'amount'                => $bType->amount ?? 0,
+                        'status'                => 0,
+                        'note'                  => $bType->billingType->name ?? 'Rent',
+                        'created_by'            => 1,
+                    ]);
 
-            $generated++;
+                    $generated++;
+                }
+            }
         }
 
         $this->info("✅ Rent schedules generated: $generated");

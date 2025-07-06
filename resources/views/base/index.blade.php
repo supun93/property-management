@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @push('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
 <style>
     #main-table th,
     #main-table td {
@@ -43,6 +44,9 @@
 </style>
 @endpush
 @section('content')
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <div class="card">
     <div class="card-header">
         <div class="row">
@@ -51,17 +55,17 @@
             </div>
             <div class="col-sm-6">
                 <div class="float-right">
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.create') }}" class="btn btn-info">
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info">
                         <span class="fa fa-plus"></span> ADD NEW
                     </a>
 
                     @if(Str::contains($tableTitle, 'Trash'))
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.index') }}" class="btn btn-info">
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info">
                         <span class="fa fa-list"></span> VIEW LIST
                     </a>
                     @else
 
-                    <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list') }}" class="btn btn-danger">
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger">
                         🗑️ VIEW TRASH
                     </a>
                     @endif
@@ -120,6 +124,22 @@
             order: [
                 [0, "{{$orderByDir}}"]
             ],
+            dom: 'Bfrtip', // ✅ Add this line
+            buttons: [{
+                extend: 'excelHtml5',
+                title: '{{ Str::headline($tableTitle) }}',
+                text: '📥 Export Excel',
+                filename: '{{ Str::slug($tableTitle) }}_{{ date("Y_m_d_His") }}',
+                exportOptions: {
+                    columns: ':not(:last-child)' // exclude action column
+                },
+                action: function(e, dt, button, config) {
+                    // Ensure export applies to filtered data
+                    dt.ajax.reload(() => {
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+                    }, false);
+                }
+            }],
             ajax: {
                 url: '{{ url()->current() }}',
                 type: 'POST',

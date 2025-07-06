@@ -10,10 +10,10 @@
       </div>
       <div class="col-sm-6">
         <div class="float-right">
-          <a href="{{ route('unit-billing-types.index') }}" class="btn btn-info">
+          <a href="{{ route('unit-billing-types.index', $record->unit_id) }}" class="btn btn-info">
             <span class="fa fa-list"></span> VIEW LIST
           </a>
-          <a href="{{ route('unit-billing-types.trash-list') }}" class="btn btn-danger">
+          <a href="{{ route('unit-billing-types.trash-list', $record->unit_id) }}" class="btn btn-danger">
             <span class="fa fa-trash"></span> VIEW TRASH
           </a>
         </div>
@@ -24,14 +24,14 @@
   <form id="submitForm" method="POST" data-url="{{ route('unit-billing-types.update', $record->id) }}">
     @csrf
     <div class="card-body">
-      
+
       <div class="form-group">
         <label>Unit<span class="text-danger">*</span></label>
-        <input id="unit_id" name="unit_id" required />
+        <input id="unit_id" required />
       </div>
       <div class="form-group">
         <label>Billing Type<span class="text-danger">*</span></label>
-        <input id="billing_type_id" name="billing_type_id" required />
+        <input id="billing_type_id" required />
       </div>
       <div class="form-group">
         <label>Status</label>
@@ -44,37 +44,15 @@
 
     <div class="card-footer">
       <button type="submit" class="btn btn-success">✅ Update</button>
-      <a href="{{ route('unit-billing-types.index') }}" class="btn btn-secondary">↩️ Back</a>
+      <a href="{{ route('unit-billing-types.index', $record->unit_id) }}" class="btn btn-secondary">↩️ Back</a>
     </div>
   </form>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.js"></script>
 <script>
-  $(document).ready(function() {
-
-    $(document).on('submit', '#submitForm', function(e) {
-      e.preventDefault();
-      const url = $(this).data('url');
-      const unitVal = unitBox.getValue()[0];
-      const typeVal = billingTypeBox.getValue()[0];
-
-      if (!unitVal || !typeVal) {
-        alert('Please select both Type and Unit');
-        return;
-      }
-      const formData = $(this).serializeArray();
-      formData.push({
-        name: "billing_type_id",
-        value: typeVal
-      });
-      formData.push({
-        name: "unit_id",
-        value: unitVal
-      });
-
-      postData(url, formData, 1, 'update');
-    });
-
+  $(document).ready(function () {
+    // 🔹 Initialize MagicSuggest dropdowns
     const unitBox = $('#unit_id').magicSuggest({
       placeholder: 'Select unit',
       valueField: 'id',
@@ -103,32 +81,57 @@
       data: "{{ route('billing-types.search_data') }}"
     });
 
+    // 🔹 Set default selected values
     setTimeout(function () {
-      const interval = setInterval(() => {
-        if (unitBox.getData().length > 0) {
-          clearInterval(interval);
+      const setDropdowns = setInterval(() => {
+        if (unitBox.getData().length > 0 && billingTypeBox.getData().length > 0) {
           unitBox.setValue([{
             id: "{{ $record->unit_id ?? 'null' }}",
             name: "{{ $record->unit->unit_name ?? '' }}"
           }]);
-        }
-        if (billingTypeBox.getData().length > 0) {
-          clearInterval(interval);
           billingTypeBox.setValue([{
             id: "{{ $record->billing_type_id ?? 'null' }}",
             name: "{{ $record->billingType->name ?? '' }}"
           }]);
+
+          clearInterval(setDropdowns);
+
+          // ✅ Make unitBox readonly
+          const $unitCtn = $('#unit_id').closest('.ms-ctn');
+          $unitCtn.find('input').prop('disabled', true);       // Disable typing
+          $unitCtn.find('.ms-close-btn').hide();               // Hide clear button
+          $unitCtn.off('click');                               // Prevent dropdown click
         }
-      }, 300);
+      }, 200);
     }, 300);
 
+    // 🔹 Submit form
+    $('#submitForm').on('submit', function (e) {
+      e.preventDefault();
+      const url = $(this).data('url');
+      const unitVal = unitBox.getValue()[0];
+      const typeVal = billingTypeBox.getValue()[0];
+
+      if (!unitVal || !typeVal) {
+        alert('Please select both Type and Unit');
+        return;
+      }
+
+      const formData = $(this).serializeArray();
+      formData.push({ name: "unit_id", value: unitVal });
+      formData.push({ name: "billing_type_id", value: typeVal });
+
+      postData(url, formData, 1, 'update');
+    });
+
+    // 🔹 Auto-expand MagicSuggest on input focus (only for billing type)
     setTimeout(() => {
-      $('.ms-ctn input').on('focus', function() {
+      $('#billing_type_id').closest('.ms-ctn').find('input').on('focus', function () {
         const ms = $(this).closest('.ms-ctn').data('magicSuggest');
         if (ms) ms.expand();
       });
     }, 300);
-    
   });
 </script>
+
 @endsection

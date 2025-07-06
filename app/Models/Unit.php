@@ -44,6 +44,11 @@ class Unit extends Model implements AuditableContract
 
     public function billingTypes()
     {
-        return $this->hasMany(UnitBillingTypes::class, 'billing_type_id', 'id');
+        return $this->hasMany(UnitBillingTypes::class, 'unit_id', 'id');
+    }
+
+    public function activeTenent()
+    {
+        return $this->hasOne(UnitContracts::class, 'unit_id', 'id')->where("status", 1);
     }
 }

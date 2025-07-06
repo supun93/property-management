@@ -51,6 +51,7 @@ class ContractController extends Controller
                 "agreement_end_date",
                 "rent_amount",
                 "next_rent_due_date",
+                "payments",
                 "status",
                 "approval_status",
                 "created_at"
@@ -58,6 +59,7 @@ class ContractController extends Controller
             ->setColumnLabel("tenant.name", "Tenant Name")
             ->setColumnLabel("unit.unit_name", "Unit Name")
             ->setColumnLabel("next_rent_due_date", "Next Due Date")
+            ->setColumnDisplay("payments", [$this->repository, 'displayListButtonAs'], ['unit-payment-schedules.index'])
             ->setColumnDisplay(
                 'status',
                 [$this->repository, 'displayStatusAs'],
@@ -69,7 +71,7 @@ class ContractController extends Controller
                 [$this->approvalStatuses, '', true] // ✅ 3rd param: pass statuses + showChip true
             )
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
-            ->setColumnSearchability("created_at", false);
+            ->setColumnSearchability("created_at", false)->addRawColumns("payments");
 
 
         $query = UnitContracts::with(['tenant', 'unit']);
@@ -111,23 +113,33 @@ class ContractController extends Controller
         $contractId = $model->id ?? null;
         $fullAmount = $model->full_amount;
         $rentAmount = $model->rent_amount;
-        $nextDueDate = null;
-        $totalInstallment = null;
         $rentPaymentType = $model->rent_payment_type;
         $durationInMonths = $model->duration_in_months;
 
         $totalInstallment = ceil($fullAmount / $rentAmount);
         $nextDueDate = now()->addMonth();
 
+        // 👉 Generate rent installments (monthly)
         if ($rentAmount > 0 && $rentPaymentType == 2) {
-            $dueDate = now();
+            $startDate = now();
+
             for ($i = 1; $i <= $durationInMonths; $i++) {
+                $dueDate = $startDate->copy()->addMonths($i - 1)->startOfMonth();
+
+                // 🛑 Skip if schedule already exists for this month
+                $exists = UnitPaymentSchedules::where('unit_contract_id', $contractId)
+                    ->whereMonth('payment_date', $dueDate->month)
+                    ->whereYear('payment_date', $dueDate->year)
+                    ->where('is_rent', 1)
+                    ->exists();
+
+                if ($exists) continue;
 
                 $payment = new UnitPaymentSchedules();
                 $payment->unit_contract_id = $contractId;
                 $payment->installment_number = $i;
                 $payment->amount = $rentAmount;
-                $payment->payment_date =  $dueDate->copy()->addMonths($i - 1);
+                $payment->payment_date = $dueDate;
                 $payment->is_rent = 1;
                 $payment->status = 0;
                 $payment->note = "Rent of installment_number " . $i;
@@ -135,28 +147,30 @@ class ContractController extends Controller
             }
         }
 
+        // 👉 Generate billing type payments for current month
         foreach ($billingTypes as $bType) {
-            $dueDate = now();
-            $payment = UnitPaymentSchedules::where("unit_contract_id", $contractId)
-                ->where("payment_date", $dueDate)
-                ->where("unit_billing_type_id", $bType->id)->first();
+            $dueDate = now()->startOfMonth();
+
+            // 🛑 Skip if billing type already exists this month
+            $exists = UnitPaymentSchedules::where('unit_contract_id', $contractId)
+                ->where('unit_billing_type_id', $bType->id)
+                ->whereMonth('payment_date', $dueDate->month)
+                ->whereYear('payment_date', $dueDate->year)
+                ->exists();
+
+            if ($exists) continue;
 
             if (isset($bType->billingType->name)) {
-                if ($payment == null) {
-                    $payment = new UnitPaymentSchedules();
-                }
-
+                $payment = new UnitPaymentSchedules();
                 $payment->unit_contract_id = $contractId;
                 $payment->unit_billing_type_id = $bType->id;
-                $payment->amount = $rentAmount;
-                $payment->payment_date =  $dueDate;
+                $payment->payment_date = $dueDate;
                 $payment->status = 0;
                 $payment->note = $bType->billingType->name;
                 $payment->save();
             }
         }
 
-        // Return or process as needed
         return [
             'total_installments' => $totalInstallment,
             'rent_amount' => $rentAmount,
@@ -164,8 +178,10 @@ class ContractController extends Controller
         ];
     }
 
+
     public function save(Request $request)
     {
+        // dd($request->all());
         $data = request()->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'unit_id' => 'required|exists:units,id',
@@ -185,10 +201,12 @@ class ContractController extends Controller
         $record->agreement_end_date = $request->agreement_end_date;
         $record->rent_amount = $request->rent_amount;
         $record->deposit_amount = $request->deposit_amount;
-        $record->rent_payment_type = 2;
-        $record->duration_in_months = 12;
-        $record->full_amount = 10000.0;
         $record->terms = $request->terms;
+        $record->status = $request->status;
+
+        $record->rent_payment_type = $request->rent_payment_type;
+        $record->duration_in_months = $request->duration_in_months;
+        $record->full_amount = $request->full_amount;
         $record->save();
 
         // Calculate rental payment fields
@@ -235,6 +253,8 @@ class ContractController extends Controller
         $record->terms = $request->terms;
         $record->status = $request->status;
         $record->save();
+
+        $calc = $this->generateRentalPayments($record);
 
         return response()->json("success");
     }

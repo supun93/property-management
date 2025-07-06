@@ -16,6 +16,7 @@ class IndexRepositoryHelper
     public $columnSearchability = [];
     public $pageTitle = '';
     public $tableTitle = '';
+    public $refId = '';
     public $viewData = [
         'view' => true,
         'export' => false,
@@ -29,13 +30,20 @@ class IndexRepositoryHelper
     protected $defaultOrderDir = 'desc';
     protected $template;
     protected $customFilters = [];
-
+    protected $rawColumnKeys = ['actions', 'status', 'approval_status', 'monthly_loop'];
     public function __construct(Model $model)
     {
         $this->model = $model;
         $this->defaultOrderBy = 'id';
         $this->defaultOrderDir = 'desc';
     }
+
+    public function addRawColumns(...$columns)
+    {
+        $this->rawColumnKeys = array_unique(array_merge($this->rawColumnKeys, $columns));
+        return $this;
+    }
+
     public function addFilter(string $name, string $label, string $type = 'select', array $options = [])
     {
         $this->customFilters[] = compact('name', 'label', 'type', 'options');
@@ -86,9 +94,9 @@ class IndexRepositoryHelper
 
         return $query;
     }
+
     public function displayStatusAs($value, $statuses = [], $defaultLabel = '', $showChip = true)
     {
-        // $matched = collect($statuses)->firstWhere('id', $value); dont use firstWhere because when value is 0, its show null
         $matched = null;
         foreach ($statuses as $status) {
             if (array_key_exists('id', $status) && $status['id'] === $value) {
@@ -97,12 +105,19 @@ class IndexRepositoryHelper
             }
         }
 
+        if (!$matched) {
+            return $showChip
+                ? '<span class="badge badge-secondary">' . ($defaultLabel ?: '-') . '</span>'
+                : ($defaultLabel ?: '-');
+        }
+
         if (!$showChip) {
             return $matched['label'];
         }
 
         return '<span class="badge badge-' . $matched['class'] . '">' . $matched['label'] . '</span>';
     }
+
 
     public function setColumns(...$columns)
     {
@@ -135,6 +150,48 @@ class IndexRepositoryHelper
         return $this;
     }
 
+    public function setColumnDBField($column = "", $dbField = "", $customFilter = false)
+    {
+        if ($customFilter) {
+
+            $columns = $this->customFilters;
+        } else {
+
+            $columns = $this->columns;
+        }
+
+        if ($column !== "" && $dbField !== "" && isset($columns[$column])) {
+            //set field and field's label
+            $columns[$column]["dbField"] = $dbField;
+
+            if ($columns[$column]["fKeyField"] == $column) {
+
+                $columns[$column]["fKeyField"] = $dbField;
+            }
+        }
+
+        if ($customFilter) {
+
+            $this->customFilters = $columns;
+        } else {
+
+            $this->columns = $columns;
+        }
+
+        return $this;
+    }
+
+    public function displayListButtonAs($value, $routeName = "")
+    {
+        if (!$value || !$routeName) return "-";
+
+        $url = route($routeName, ['id' => $value]);
+
+        return "<a href='{$url}' class='btn btn-sm btn-info'>
+                <i class='fa fa-list'></i>View List</a>";
+    }
+
+
     public function setColumnDisplay($column, $callback, $args = [])
     {
         $this->columnDisplayCallbacks[$column] = ['callback' => $callback, 'args' => $args];
@@ -156,6 +213,12 @@ class IndexRepositoryHelper
     public function setTableTitle($title)
     {
         $this->tableTitle = $title;
+        return $this;
+    }
+
+    public function setRefferanceId($rfId)
+    {
+        $this->refId = $rfId;
         return $this;
     }
 
@@ -207,18 +270,24 @@ class IndexRepositoryHelper
             'tableTitle' => $this->tableTitle,
             'viewData' => $this->viewData,
             'model' => $this->model,
-            'customFilters' => $this->customFilters, // 👈 pass to blade
-            "orderByDir" => $this->defaultOrderDir
+            'customFilters' => $this->customFilters,
+            "orderByDir" => $this->defaultOrderDir,
+            "refId" => $this->refId
         ]);
     }
 
     public function buildAjaxDataTable(Builder $query)
     {
         $query = $this->applyCustomFilters($query);
-       
-        if ($this->defaultOrderBy && !request()->has('order')) {
-            $query->orderBy($this->defaultOrderBy, $this->defaultOrderDir);
+
+        // Fully dynamic ordering: backend if no frontend specified
+        if (!request()->has('order') || empty(request('order')[0]['column'])) {
+            if ($this->defaultOrderBy) {
+                $query->getQuery()->orders = null; // clear old ones
+                $query->orderBy($this->defaultOrderBy, $this->defaultOrderDir);
+            }
         }
+
 
         $datatable = DataTables::of($query);
 
@@ -228,16 +297,33 @@ class IndexRepositoryHelper
             if (isset($this->columnDisplayCallbacks[$colKey])) {
                 $datatable->editColumn($colKey, function ($item) use ($colKey) {
                     $callbackData = $this->columnDisplayCallbacks[$colKey];
+
+                    // ✅ Always fallback to item->id when col is fake (like 'billing_types')
+                    $value = data_get($item, $colKey);
+                    if (is_null($value)) {
+                        // Fallback: for virtual columns like 'billing_types'
+                        $value = $item->id ?? null;
+                    }
+
+                    $args = is_array($callbackData['args']) ? $callbackData['args'] : [];
+
                     return call_user_func_array($callbackData['callback'], [
-                        data_get($item, $colKey),
-                        ...$callbackData['args'],
+                        $value,
+                        ...$args,
                     ]);
                 });
                 continue;
             }
 
             if (Str::contains($colKey, '.')) {
-                $datatable->addColumn($colKey, fn($item) => data_get($item, $colKey));
+                $datatable->addColumn($colKey, function ($item) use ($colKey) {
+                    return data_get($item, $colKey, '-'); // Fallback to '-' if null
+                });
+            } elseif (!isset($this->columnDisplayCallbacks[$colKey])) {
+                // For direct columns without custom display, also apply safe fallback
+                $datatable->addColumn($colKey, function ($item) use ($colKey) {
+                    return data_get($item, $colKey, '-');
+                });
             }
         }
 
@@ -281,8 +367,7 @@ class IndexRepositoryHelper
                 });
             }
         }
-
-        return $datatable->rawColumns(['actions', 'status', 'approval_status', "monthly_loop"])->make(true);
+        return $datatable->rawColumns($this->rawColumnKeys)->make(true);
     }
 
     public function setDefaultOrder(string $column, string $direction = 'desc')

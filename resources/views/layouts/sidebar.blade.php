@@ -20,54 +20,55 @@ $isManager = auth()->check() && auth()->user()->role === 2;
         </li>
 
         @if($isManager || $isAdmin)
-        {{-- Property Category --}}
-        <li class="nav-item">
-          <a href="{{ route('property-category.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-tags"></i>
-            <p>Property Categories</p>
-          </a>
-        </li>
+          {{-- Property Category --}}
+          <li class="nav-item">
+            <a href="{{ route('billing-types.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-tags"></i>
+              <p>Billing Types</p>
+            </a>
+          </li>
 
-        {{-- Properties --}}
-        <li class="nav-item">
-          <a href="{{ route('property.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-building"></i>
-            <p>Properties</p>
-          </a>
-        </li>
+          {{-- Properties --}}
+          <li class="nav-item">
+            <a href="{{ route('property.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-building"></i>
+              <p>Properties</p>
+            </a>
+          </li>
 
-        {{-- Units --}}
-        <li class="nav-item">
-          <a href="{{ route('unit.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-th-large"></i>
-            <p>Units</p>
-          </a>
-        </li>
-        {{-- Tenants --}}
-        <li class="nav-item">
-          <a href="{{ route('tenants.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Tenants</p>
-          </a>
-        </li>
+          {{-- Units --}} 
+          <li class="nav-item">
+            <a href="{{ route('unit.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-th-large"></i>
+              <p>Units</p>
+            </a>
+          </li>
 
-        {{-- Contracts --}}
-        <li class="nav-item">
-          <a href="{{ route('unit-contracts.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Contracts</p>
-          </a>
-        </li>
+          {{-- Tenants --}}
+          <li class="nav-item">
+            <a href="{{ route('tenants.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Tenants</p>
+            </a>
+          </li>
+
+          {{-- Contracts --}}
+          <li class="nav-item">
+            <a href="{{ route('unit-contracts.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Contracts</p> 
+            </a>
+          </li>
         @endif
 
         @if($isAdmin)
-        {{-- Users --}}
-        <li class="nav-item">
-          <a href="{{ route('user.index') }}" class="nav-link">
-            <i class="nav-icon fas fa-users"></i>
-            <p>Users</p>
-          </a>
-        </li>
+          {{-- Users --}}
+          <li class="nav-item">
+            <a href="{{ route('user.index') }}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Users</p>
+            </a>
+          </li>
         @endif
 
 

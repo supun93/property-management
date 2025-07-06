@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\BillingTypesController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceLineController;
 use App\Http\Controllers\PropertyCategoryController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\TenantController;
@@ -22,48 +24,6 @@ Route::group(['middleware' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'is_manager'], function () {
-
-    Route::prefix('tenant')->name('tenants.')->group(function () {
-        Route::get('', [TenantController::class, 'index'])->name('index');
-        Route::post('', [TenantController::class, 'index']);
-        Route::get('trash-list', [TenantController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [TenantController::class, 'trash']);
-        Route::get('create', [TenantController::class, 'create'])->name('create');
-        Route::post('save', [TenantController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [TenantController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [TenantController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [TenantController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [TenantController::class, 'restore'])->name('restore');
-        Route::post('search_data', [TenantController::class, 'searchData'])->name('search_data');
-    });
-
-    Route::prefix('contracts')->name('unit-contracts.')->group(function () {
-        Route::get('', [ContractController::class, 'index'])->name('index');
-        Route::post('', [ContractController::class, 'index']);
-        Route::get('trash-list', [ContractController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [ContractController::class, 'trash']);
-        Route::get('create', [ContractController::class, 'create'])->name('create');
-        Route::post('save', [ContractController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [ContractController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [ContractController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [ContractController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [ContractController::class, 'restore'])->name('restore');
-        Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
-    });
-
-    Route::prefix('payments')->name('unit-payment-schedules.')->group(function () {
-        Route::get('', [UnitPaymentController::class, 'index'])->name('index');
-        Route::post('', [UnitPaymentController::class, 'index']);
-        Route::get('trash-list', [UnitPaymentController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [UnitPaymentController::class, 'trash']);
-        Route::get('create', [UnitPaymentController::class, 'create'])->name('create');
-        Route::post('save', [UnitPaymentController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [UnitPaymentController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [UnitPaymentController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [UnitPaymentController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [UnitPaymentController::class, 'restore'])->name('restore');
-        Route::post('search_data', [UnitPaymentController::class, 'searchData'])->name('search_data');
-    });
 
     Route::prefix('property-category')->name('property-category.')->group(function () {
         Route::get('', [PropertyCategoryController::class, 'index'])->name('index');
@@ -106,6 +66,104 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('restore/{id}', [UnitController::class, 'restore'])->name('restore');
         Route::post('search_data', [UnitController::class, 'searchData'])->name('search_data');
     });
+
+    Route::prefix('billing-types')->name('billing-types.')->group(function () {
+        Route::get('', [BillingTypesController::class, 'index'])->name('index');
+        Route::post('', [BillingTypesController::class, 'index']);
+        Route::get('trash-list', [BillingTypesController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [BillingTypesController::class, 'trash']);
+        Route::get('create', [BillingTypesController::class, 'create'])->name('create');
+        Route::post('save', [BillingTypesController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [BillingTypesController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [BillingTypesController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [BillingTypesController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [BillingTypesController::class, 'restore'])->name('restore');
+        Route::post('search_data', [BillingTypesController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('unit-billing-types')->name('unit-billing-types.')->group(function () {
+        Route::get('{id}', [UnitBillingTypesController::class, 'index'])->name('index');
+        Route::post('{id}', [UnitBillingTypesController::class, 'index']);
+        Route::get('trash-list/{id}', [UnitBillingTypesController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list/{id}', [UnitBillingTypesController::class, 'trash']);
+        Route::get('create/{id}', [UnitBillingTypesController::class, 'create'])->name('create');
+        Route::post('save/{id}', [UnitBillingTypesController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [UnitBillingTypesController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [UnitBillingTypesController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [UnitBillingTypesController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [UnitBillingTypesController::class, 'restore'])->name('restore');
+        Route::post('search_data/{id}', [UnitBillingTypesController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('tenant')->name('tenants.')->group(function () {
+        Route::get('', [TenantController::class, 'index'])->name('index');
+        Route::post('', [TenantController::class, 'index']);
+        Route::get('trash-list', [TenantController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [TenantController::class, 'trash']);
+        Route::get('create', [TenantController::class, 'create'])->name('create');
+        Route::post('save', [TenantController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [TenantController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [TenantController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [TenantController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [TenantController::class, 'restore'])->name('restore');
+        Route::post('search_data', [TenantController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('contracts')->name('unit-contracts.')->group(function () {
+        Route::get('', [ContractController::class, 'index'])->name('index');
+        Route::post('', [ContractController::class, 'index']);
+        Route::get('trash-list', [ContractController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [ContractController::class, 'trash']);
+        Route::get('create', [ContractController::class, 'create'])->name('create');
+        Route::post('save', [ContractController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [ContractController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [ContractController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [ContractController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [ContractController::class, 'restore'])->name('restore');
+        Route::post('search_data', [ContractController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('payments')->name('unit-payment-schedules.')->group(function () {
+        Route::get('{id}', [UnitPaymentController::class, 'index'])->name('index');
+        Route::post('{id}', [UnitPaymentController::class, 'index']);
+        Route::get('trash-list/{id}', [UnitPaymentController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list/{id}', [UnitPaymentController::class, 'trash']);
+        Route::get('create/{id}', [UnitPaymentController::class, 'create'])->name('create');
+        Route::post('save/{id}', [UnitPaymentController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [UnitPaymentController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [UnitPaymentController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [UnitPaymentController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [UnitPaymentController::class, 'restore'])->name('restore');
+        Route::post('search_data/{id}', [UnitPaymentController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('invoices')->name('invoice.')->group(function () {
+        Route::get('', [InvoiceController::class, 'index'])->name('index');
+        Route::post('', [InvoiceController::class, 'index']);
+        Route::get('trash-list', [InvoiceController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [InvoiceController::class, 'trash']);
+        Route::get('create', [InvoiceController::class, 'create'])->name('create');
+        Route::post('save', [InvoiceController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [InvoiceController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [InvoiceController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [InvoiceController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [InvoiceController::class, 'restore'])->name('restore');
+        Route::post('search_data', [InvoiceController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('invoice_lines')->name('invoice_lines.')->group(function () {
+        Route::get('', [InvoiceLineController::class, 'index'])->name('index');
+        Route::post('', [InvoiceLineController::class, 'index']);
+        Route::get('trash-list', [InvoiceLineController::class, 'trash'])->name('trash-list');
+        Route::post('trash-list', [InvoiceLineController::class, 'trash']);
+        Route::get('create', [InvoiceLineController::class, 'create'])->name('create');
+        Route::post('save', [InvoiceLineController::class, 'save'])->name('save');
+        Route::get('edit/{id}', [InvoiceLineController::class, 'edit'])->name('edit');
+        Route::post('update/{id}', [InvoiceLineController::class, 'update'])->name('update');
+        Route::post('trash/{id}', [InvoiceLineController::class, 'delete'])->name('trash');
+        Route::post('restore/{id}', [InvoiceLineController::class, 'restore'])->name('restore');
+        Route::post('search_data', [InvoiceLineController::class, 'searchData'])->name('search_data');
+    });
 });
 
 Route::group(['middleware' => 'is_admin'], function () {
@@ -124,33 +182,6 @@ Route::group(['middleware' => 'is_admin'], function () {
         Route::post('search_data', [UserController::class, 'searchData'])->name('search_data');
     });
 
-    Route::prefix('billing-types')->name('billing-types.')->group(function () {
-        Route::get('', [BillingTypesController::class, 'index'])->name('index');
-        Route::post('', [BillingTypesController::class, 'index']);
-        Route::get('trash-list', [BillingTypesController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [BillingTypesController::class, 'trash']);
-        Route::get('create', [BillingTypesController::class, 'create'])->name('create');
-        Route::post('save', [BillingTypesController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [BillingTypesController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [BillingTypesController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [BillingTypesController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [BillingTypesController::class, 'restore'])->name('restore');
-        Route::post('search_data', [BillingTypesController::class, 'searchData'])->name('search_data');
-    });
-
-    Route::prefix('unit-billing-types')->name('unit-billing-types.')->group(function () {
-        Route::get('', [UnitBillingTypesController::class, 'index'])->name('index');
-        Route::post('', [UnitBillingTypesController::class, 'index']);
-        Route::get('trash-list', [UnitBillingTypesController::class, 'trash'])->name('trash-list');
-        Route::post('trash-list', [UnitBillingTypesController::class, 'trash']);
-        Route::get('create', [UnitBillingTypesController::class, 'create'])->name('create');
-        Route::post('save', [UnitBillingTypesController::class, 'save'])->name('save');
-        Route::get('edit/{id}', [UnitBillingTypesController::class, 'edit'])->name('edit');
-        Route::post('update/{id}', [UnitBillingTypesController::class, 'update'])->name('update');
-        Route::post('trash/{id}', [UnitBillingTypesController::class, 'delete'])->name('trash');
-        Route::post('restore/{id}', [UnitBillingTypesController::class, 'restore'])->name('restore');
-        Route::post('search_data', [UnitBillingTypesController::class, 'searchData'])->name('search_data');
-    });
 });
 
 
