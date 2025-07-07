@@ -186,41 +186,46 @@ class TenantController extends Controller
             ->first();
 
         $invoices = collect();
-        $pendingRentPayments = collect();
-        $paidRentPayments = collect();
-        $pendingUtilityPayments = collect();
-        $paidUtilityPayments = collect();
+        $pendingPayments = collect();
+        $paidPayments = collect();
 
         if ($contract) {
             // 🔶 Pending Rent Payments
             $pendingRentPayments = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
                 ->where('is_rent', 1)
                 ->whereIn('status', [0, 2]) // PENDING
-                ->orderBy('payment_date', 'asc')->limit(5)
+                ->get();
+
+            // 🔶 Pending Utility Payments
+            $pendingUtilityPayments = UnitPaymentSchedules::with('unitBillingType.billingType')
+                ->where('unit_contract_id', $contract->id)
+                ->where('is_rent', 0)
+                ->whereIn('status', [0, 2]) // PENDING
                 ->get();
 
             // ✅ Paid Rent Payments
             $paidRentPayments = UnitPaymentSchedules::where('unit_contract_id', $contract->id)
                 ->where('is_rent', 1)
                 ->where('status', 1) // PAID
-                ->orderBy('payment_date', 'desc')
                 ->get();
 
-            // 🔶 Pending Utilities
-            $pendingUtilityPayments = UnitPaymentSchedules::with('unitBillingType.billingType')
-                ->where('unit_contract_id', $contract->id)
-                ->where('is_rent', 0)
-                ->whereIn('status', [0, 2]) // PENDING
-                ->orderBy('payment_date', 'asc')
-                ->get();
-
-            // ✅ Paid Utilities
+            // ✅ Paid Utility Payments
             $paidUtilityPayments = UnitPaymentSchedules::with('unitBillingType.billingType')
                 ->where('unit_contract_id', $contract->id)
                 ->where('is_rent', 0)
                 ->where('status', 1) // PAID
-                ->orderBy('payment_date', 'desc')
                 ->get();
+
+            // 🔁 Merge and sort
+            $pendingPayments = $pendingRentPayments
+                ->concat($pendingUtilityPayments)
+                ->sortBy('payment_date')
+                ->values();
+
+            $paidPayments = $paidRentPayments
+                ->concat($paidUtilityPayments)
+                ->sortBy('payment_date')
+                ->values();
         }
 
         // 📄 Invoice History
@@ -232,10 +237,8 @@ class TenantController extends Controller
             'tenant',
             'contract',
             'invoices',
-            'pendingRentPayments',
-            'paidRentPayments',
-            'pendingUtilityPayments',
-            'paidUtilityPayments'
+            'pendingPayments',
+            'paidPayments'
         ));
     }
 }
