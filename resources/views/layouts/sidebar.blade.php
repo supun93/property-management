@@ -38,7 +38,12 @@ $isAdminActive = collect($adminRoutes)->contains(fn($r) => request()->is($r));
             <p>Pending Invoices</p>
           </a>
         </li>
-
+        <li class="nav-item">
+          <a href="{{ route('unit-contracts.index') }}" class="nav-link">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Contracts</p>
+          </a>
+        </li>
         {{-- Grouped Items --}}
         <li class="nav-item has-treeview">
           <a href="#" class="nav-link">
@@ -79,12 +84,7 @@ $isAdminActive = collect($adminRoutes)->contains(fn($r) => request()->is($r));
                 <p>Tenants</p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="{{ route('unit-contracts.index') }}" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Contracts</p>
-              </a>
-            </li>
+
           </ul>
         </li>
         @endif

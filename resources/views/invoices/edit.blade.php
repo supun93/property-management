@@ -44,7 +44,7 @@
         <textarea name="approval_remarks" class="form-control" id="approval_remarks" rows="3">{{ $record->approval_remarks ?? '' }}</textarea>
       </div>
     </div>
-    @if($record->status != 1)
+    @if($record->status != 1 && count($record->slips) > 0)
     <div class="card-footer">
       <button type="submit" class="btn btn-success">✅ Update</button>
     </div>

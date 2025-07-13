@@ -28,6 +28,7 @@ class IndexRepositoryHelper
         'add' => true,
         'trash' => false,
         'trashList' => false,
+        'download' => false
     ];
     protected $defaultOrderBy = null;
     protected $defaultOrderDir = 'desc';
@@ -330,17 +331,22 @@ class IndexRepositoryHelper
             $buttons = '';
 
             if ($this->viewData['edit']) {
-                $buttons .= '<a href="' . route($routePrefix . '.edit', $item->id) . '" class="text-indigo-600 text-sm">✏️</a> ';
+                $buttons .= '<a href="' . route($routePrefix . '.edit', $item->id) . '" class="text-indigo-600 text-sm" style="margin-right:10px"><span class="fa fa-edit"></span> Edit</a> ';
             }
 
             if ($this->viewData['trash']) {
                 $route = route($routePrefix . '.trash', $item->id);
-                $buttons .= '<button class="btn btn-sm btn-link text-danger trashButton" data-url="' . $route . '">🗑️</button>';
+                $buttons .= '<button class="btn btn-sm btn-link text-danger trashButton" data-url="' . $route . '" style="margin-right:10px">🗑️</button> ';
             }
 
             if ($this->viewData['restore']) {
                 $route = route($routePrefix . '.restore', $item->id);
-                $buttons .= '<button class="btn btn-sm btn-link text-success restoreButton" data-url="' . $route . '">♻️</button>';
+                $buttons .= '<button class="btn btn-sm btn-link text-success restoreButton" data-url="' . $route . '" style="margin-right:10px">♻️</button> ';
+            }
+
+            if ($this->viewData['download']) {
+                $route = route($routePrefix . '.download', $item->id);
+                $buttons .= '<a href="' . $route . '" class="text-indigo-600 text-sm"><span class="fa fa-download"></span> Download</a> ';
             }
 
             return $buttons;

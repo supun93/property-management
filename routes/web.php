@@ -25,6 +25,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('', [TenantController::class, 'dashboard'])->name('dashboard');
 
+    Route::get('invoices/download/{id}', [InvoiceController::class, 'download'])->name('invoice.download');
+    
     Route::prefix('slips')->name('slip.')->group(function () {
         Route::post('upload', [PaymentSlipController::class, 'upload'])->name('upload');
         Route::post('trash/{id}', [PaymentSlipController::class, 'delete'])->name('trash');
@@ -158,7 +160,6 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('trash/{id}', [InvoiceController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [InvoiceController::class, 'restore'])->name('restore');
         Route::post('search_data/{id}', [InvoiceController::class, 'searchData'])->name('search_data');
-        Route::get('download/{id}', [InvoiceController::class, 'download'])->name('download');
         Route::get('upload/form/{id}', [InvoiceController::class, 'uploadForm'])->name('upload-form');
 
         Route::get('pending/list', [InvoiceController::class, 'pendingIndex'])->name('pending.index');

@@ -64,7 +64,7 @@ class InvoiceController extends BaseController
         } else {
             $this->repository->setTableTitle("Invoice")
                 ->disableViewData("view", 'trash', 'trashList')
-                ->enableViewData("export", "edit", "add");
+                ->enableViewData("export", "edit", "add", 'download');
         }
 
         return $this->repository->render("layouts.master")->index($query);
