@@ -26,7 +26,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('', [TenantController::class, 'dashboard'])->name('dashboard');
 
     Route::get('invoices/download/{id}', [InvoiceController::class, 'download'])->name('invoice.download');
-    Route::get('invoices/upload/form/{id}', [InvoiceController::class, 'uploadForm'])->name('upload-form');
+    Route::get('invoices/upload/form/{id}', [InvoiceController::class, 'uploadForm'])->name('invoice.upload-form');
 
     Route::prefix('slips')->name('slip.')->group(function () {
         Route::post('upload', [PaymentSlipController::class, 'upload'])->name('upload');
