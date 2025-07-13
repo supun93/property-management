@@ -137,7 +137,7 @@
                             <td>{{ $i++ }}</td>
                             <td>{{ isset($payment->unitBillingType) ? 'Utility' : 'Rent' }}</td>
                             <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('F Y') }}</td>
-                            <td>{{ $payment->unitBillingType->billingType->name ?? '-' }}</td>
+                            <td>{{ $payment->note ?? '-' }}</td>
                             <td>Rs. {{ number_format($payment->amount, 2) }}</td>
                             <td><span class="badge badge-success">PAID</span></td>
                             <td>{{ $payment->paid_at ?? '-' }}</td>
