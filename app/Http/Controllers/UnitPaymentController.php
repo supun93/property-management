@@ -25,7 +25,7 @@ class UnitPaymentController extends Controller
     public $statuses = [
         'Active' => ['id' => 1, 'label' => 'Paid', 'class' => 'success'],
         'Pending' => ['id' => 0, 'label' => 'Pending', 'class' => 'warning'],
-        'Pending Verification' => ['id' => 2, 'label' => 'Pending Verification', 'class' => 'info'],
+        'Rejected' => ['id' => 2, 'label' => 'Rejected', 'class' => 'danger'],
     ];
 
     public function index($id, Request $request)
@@ -71,7 +71,8 @@ class UnitPaymentController extends Controller
                 [$this->statuses, '', true] // ✅ 3rd param: pass statuses + showChip true
             )
             ->setColumnSearchability("created_at", false)
-            ->addFilter('status', 'Status', 'select', [0 => 'Pending', 2 => 'Pending Verification', 1 => 'Paid'])
+            ->addFilter('status', 'Status', 'select', [0 => 'Pending', 1 => 'Paid', 2 => 'Rejected'])
+            ->addFilter('unit_billing_type_id', 'Billing Type', 'select', $billingTypes)
             ->addFilter('unit_billing_type_id', 'Billing Type', 'select', $billingTypes)
             ->addFilter('payment_date_from', 'From Date', 'date') // ✅ added
             ->addFilter('payment_date_to', 'To Date', 'date')     // ✅ added
