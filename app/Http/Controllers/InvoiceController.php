@@ -123,11 +123,11 @@ class InvoiceController extends BaseController
         if ($this->history) {
             $this->repository->setTableTitle("Invoices History")
                 ->disableViewData("view", 'trash', 'trashList', 'add')
-                ->enableViewData("export", 'edit');
+                ->enableViewData("export", 'edit', 'download');
         } else {
             $this->repository->setTableTitle("Pending Invoices")
                 ->disableViewData("view", 'trash', 'trashList', 'add')
-                ->enableViewData("export", 'edit');
+                ->enableViewData("export", 'edit', 'download');
         }
 
 
