@@ -1,34 +1,43 @@
+<!-- Main Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-  <!-- Left navbar links -->
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-        <i class="fas fa-bars"></i>
-      </a>
-    </li>
-  </ul>
-
-  <!-- Right navbar links -->
-  <ul class="navbar-nav ml-auto">
-    <!-- User Dropdown -->
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">
-        <i class="fas fa-user"></i> {{ Auth::user()->name }}
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#">Profile</a></li>
-        <li>
-          <hr class="dropdown-divider">
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item" style="color: #a79999;">Logout</button>
-          </form>
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <!-- Hamburger Toggle -->
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#" role="button">
+                <i class="fas fa-bars"></i>
+            </a>
         </li>
-       
-      </ul>
-    </li>
+        <!-- Dashboard Link -->
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+        </li>
+    </ul>
 
-
-  </ul>
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- User Dropdown Menu -->
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#" role="button">
+                <i class="fas fa-user-circle"></i>
+                {{ Auth::user()->name }}
+                <i class="fas fa-angle-down ml-1"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                <span class="dropdown-item dropdown-header">{{ Auth::user()->email }}</span>
+                <div class="dropdown-divider"></div>
+               
+                <div class="dropdown-divider"></div>
+                <!-- Logout Form -->
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </li>
+    </ul>
 </nav>
-

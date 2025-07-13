@@ -177,7 +177,7 @@ class TenantController extends Controller
         $tenant = Tenants::where('user_id', $user->id)->first();
 
         if (!$tenant) {
-            abort(403, "No tenant profile found.");
+            return view('dashboard');
         }
 
         $contract = UnitContracts::with(['unit', 'unit.property'])
