@@ -99,10 +99,12 @@
                             <a href="{{ asset('storage/' . $slip->file_path) }}" target="_blank" class="btn btn-sm btn-primary">
                                 <i class="fa fa-download"></i> Download
                             </a>
+                            @if($record->status != 1)
                             {{-- Optional Delete --}}
                             <button class="btn btn-sm btn-danger" onclick='deleteSlip("{{ $slip->id }}")'>
                                 <i class="fa fa-trash"></i>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
