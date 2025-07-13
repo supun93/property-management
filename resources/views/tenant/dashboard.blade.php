@@ -36,7 +36,6 @@
                     <th>Amount</th>
                     <th>Status</th>
                     <th>Date</th>
-                    <th>PDF</th>
                     <th></th>
                 </tr>
             </thead>

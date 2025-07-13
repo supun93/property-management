@@ -4,6 +4,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.css" />
 
 <div class="card shadow-sm">
+    @if($record->status == 1)
+    <div class="alert alert-success">
+        Invoice marked as <b>Paid</b>. Payment has been successfully processed.
+    </div>
+    @elseif($record->status == 2)
+    <div class="alert alert-danger">
+        Invoice <b>Rejected</b>. Please review the remarks and resolve any issues.
+    </div>
+    @endif
     <div class="card-header bg-dark text-white">
         <div class="row">
             <div class="col-sm-6">
@@ -42,21 +51,23 @@
             </div>
 
             <hr>
-
+            @if($record->status != 1)
             <div class="form-group">
                 <label><b>Upload Payment Slip</b></label>
                 <input type="file" name="file" class="form-control" required>
             </div>
-
+            @endif
             <div class="form-group">
                 <label><b>Remarks</b> (optional)</label>
-                <textarea name="remarks" class="form-control" rows="3" placeholder="Add any remarks..."></textarea>
+                <textarea name="remarks" class="form-control" rows="3" placeholder="Add any remarks...">{{$record->approval_remarks}}</textarea>
             </div>
         </div>
-
+        @if($record->status != 1)
         <div class="card-footer text-right">
             <button type="submit" class="btn btn-success"><i class="fa fa-upload"></i> Upload Slip</button>
         </div>
+        @endif
+
     </form>
 
     <hr />
