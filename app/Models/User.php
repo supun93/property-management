@@ -50,5 +50,8 @@ class User extends Authenticatable implements AuditableContract
         ];
     }
 
-    
+    public function tenent()
+    {
+        return $this->hasOne(Tenants::class, 'user_id', 'id');
+    }
 }

@@ -19,6 +19,10 @@
         <li><a class="dropdown-item" href="#">Profile</a></li>
         <li>
           <hr class="dropdown-divider">
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="dropdown-item" style="color: #a79999;">Logout</button>
+          </form>
         </li>
        
       </ul>

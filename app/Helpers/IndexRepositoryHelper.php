@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Str;
 
@@ -304,7 +305,6 @@ class IndexRepositoryHelper
             }
         }
 
-
         $datatable = DataTables::of($query);
 
         foreach ($this->columns as $col) {
@@ -313,30 +313,11 @@ class IndexRepositoryHelper
             if (isset($this->columnDisplayCallbacks[$colKey])) {
                 $datatable->editColumn($colKey, function ($item) use ($colKey) {
                     $callbackData = $this->columnDisplayCallbacks[$colKey];
-
-                    // ✅ Always fallback to item->id when col is fake (like 'billing_types')
-                    $value = data_get($item, $colKey);
-                    if (is_null($value)) {
-                        // Fallback: for virtual columns like 'billing_types'
-                        $value = $item->id ?? null;
-                    }
-
+                    $value = data_get($item, $colKey) ?? $item->id ?? null;
                     $args = is_array($callbackData['args']) ? $callbackData['args'] : [];
-
-                    return call_user_func_array($callbackData['callback'], [
-                        $value,
-                        ...$args,
-                    ]);
+                    return call_user_func_array($callbackData['callback'], [$value, ...$args]);
                 });
-                continue;
-            }
-
-            if (Str::contains($colKey, '.')) {
-                $datatable->addColumn($colKey, function ($item) use ($colKey) {
-                    return data_get($item, $colKey, '-'); // Fallback to '-' if null
-                });
-            } elseif (!isset($this->columnDisplayCallbacks[$colKey])) {
-                // For direct columns without custom display, also apply safe fallback
+            } else {
                 $datatable->addColumn($colKey, function ($item) use ($colKey) {
                     return data_get($item, $colKey, '-');
                 });
@@ -365,26 +346,26 @@ class IndexRepositoryHelper
             return $buttons;
         });
 
-        foreach ($this->columns as $col) {
-            $colKey = is_array($col) ? $col['key'] : $col;
+        $datatable->filter(function ($query) {
+            $search = request()->get('search')['value'] ?? null;
 
-            if (isset($this->columnSearchability[$colKey]) && !$this->columnSearchability[$colKey]) {
-                continue;
-            }
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    foreach ($this->columns as $col) {
+                        $colKey = is_array($col) ? $col['key'] : $col;
 
-            if (Str::contains($colKey, '.')) {
-                [$relation, $field] = explode('.', $colKey, 2);
-                $datatable->filterColumn($colKey, function ($query, $keyword) use ($relation, $field) {
-                    $query->whereHas($relation, fn($q) => $q->where($field, 'like', "%{$keyword}%"));
-                });
-            } else {
-                $datatable->filterColumn($colKey, function ($query, $keyword) use ($colKey) {
-                    $query->where($colKey, 'like', "%{$keyword}%");
+                        if (Str::contains($colKey, '.')) continue;
+                        if (!Schema::hasColumn($this->model->getTable(), $colKey)) continue;
+
+                        $q->orWhere($colKey, 'like', "%{$search}%");
+                    }
                 });
             }
-        }
+        });
+
         return $datatable->rawColumns($this->rawColumnKeys)->make(true);
     }
+
 
     public function setDefaultOrder(string $column, string $direction = 'desc')
     {

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('pdf_path')->nullable(); // If PDF is stored
             $table->string('name'); // Invoice title or reference
             $table->integer('status')->default(0); // 0=Pending, 1=Paid, etc.
-
+            $table->string("approval_remarks")->nullable();
             $table->unsignedBigInteger("created_by")->nullable();
             $table->unsignedBigInteger("updated_by")->nullable();
             $table->unsignedBigInteger("deleted_by")->nullable();

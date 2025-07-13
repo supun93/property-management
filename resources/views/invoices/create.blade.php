@@ -2,48 +2,64 @@
 
 @section('content')
 <div class="card">
-  <div class="card-header">
+  <div class="card-header bg-dark text-white">
     <div class="row">
       <div class="col-sm-6">
         <h4 class="card-title"><b>Invoice - New</b></h4>
       </div>
       <div class="col-sm-6">
         <div class="float-right">
-          <a href="{{ route('invoices.index') }}" class="btn btn-info">
+          <a href="{{ route('invoice.index', $contract->id) }}" class="btn btn-info">
             <i class="fa fa-list"></i> VIEW LIST
-          </a>
-          <a href="{{ route('invoices.trash-list') }}" class="btn btn-danger">
-            <i class="fa fa-trash"></i> VIEW TRASH
           </a>
         </div>
       </div>
     </div>
   </div>
 
-  <form id="submitForm" method="POST" action="{{ route('invoices.save') }}" data-url="{{ route('invoices.save') }}">
+  <form id="submitForm" method="POST" data-url="{{ route('invoice.save', $contract->id) }}">
     @csrf
     <div class="card-body">
-      <div class="form-group">
-        <label for="name">Name <span class="text-danger">*</span></label>
-        <input type="text" name="name" class="form-control" id="name" placeholder="Enter name" required>
-      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Billing Type</th>
+            <th>Amount</th>
+            <th>Payment Date</th> 
+          </tr>
+        </thead>
+        <tbody>
+          @foreach($schedules as $schedule)
+          <tr>
+            <td>{{ $schedule->note }}</td>
+            <td>
+              <input type="number" step="0.01" name="amounts[{{ $schedule->id }}]"
+                value="{{ $schedule->amount }}"
+                class="form-control"
+                {{ $schedule->is_rent ? 'readonly' : '' }}>
+            </td>
+            <td>{{ $schedule->payment_date }}</td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
     </div>
 
     <div class="card-footer">
       <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save</button>
-      <a href="{{ route('invoices.index') }}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Back</a>
     </div>
   </form>
 </div>
 <script>
   $(document).ready(function() {
 
-    
-      $("#submitForm").on('submit', function(e) {
-          e.preventDefault();
-          const url = $(this).data('url');
-          postData(url, $(this).serialize(), 1, 'save');
-      });
+
+    $("#submitForm").on('submit', function(e) {
+      e.preventDefault();
+      const url = $(this).data('url');
+      postData(url, $(this).serialize(), 1, 'save');
+    });
 
   });
 </script>

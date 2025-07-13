@@ -48,7 +48,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 <div class="card">
-    <div class="card-header">
+    <div class="card-header bg-dark text-white">
         <div class="row">
             <div class="col-sm-6">
                 <h4 class="card-title"><b>{{ Str::headline($tableTitle) }} List</b></h4>
@@ -56,23 +56,23 @@
             <div class="col-sm-6">
                 <div class="float-right">
                     @if($viewData["add"])
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info">
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info btn-sm">
                             <span class="fa fa-plus"></span> ADD NEW
                         </a>
                     @endif
 
                     @if(Str::contains($tableTitle, 'Trash'))
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info">
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info btn-sm">
                             <span class="fa fa-list"></span> VIEW LIST
                         </a>
                     @elseif($viewData["trashList"])
 
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger">
+                        <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger btn-sm">
                             🗑️ VIEW TRASH
                         </a>
                     @endif
                     @if($extraListButtonUrl)
-                        <a href="{{ $extraListButtonUrl }}" class="btn btn-info">
+                        <a href="{{ $extraListButtonUrl }}" class="btn btn-info btn-sm">
                             <span class="fa fa-list"></span> {{ $extraListButtonLabel }}
                         </a>
                     @endif

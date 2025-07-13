@@ -12,6 +12,9 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+  <!-- Font Awesome CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
   <style>
     /* Move search bar to right */
     div.dataTables_wrapper div.dataTables_filter {
@@ -63,6 +66,8 @@
   <script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+
 
   <script>
     var loadSpin = $.dialog({
@@ -149,257 +154,257 @@
         }
       }
 
-      
+
     });
 
     function postData(url, data, confirm, action, reload, datatableId, datatableClass, responseFunction) {
 
-        if (confirm == 1) {
-          if (action == '' || action == undefined) {
-            action = "do";
-          }
+      if (confirm == 1) {
+        if (action == '' || action == undefined) {
+          action = "do";
+        }
 
-          $.confirm({
-            title: 'Are you sure?',
-            content: "You won't be able to " + action + " this?",
-            backgroundDismissAnimation: 'glow',
-            type: 'orange',
-            typeAnimated: true,
-            autoClose: 'cancel|10000',
-            buttons: {
-              confirm: {
-                text: 'Yes, ' + action + ' it!',
-                btnClass: 'btn-success',
-                keys: ['enter', 'shift'],
-                action: function() {
-                  $.ajax({
-                    url: url,
-                    data: data,
-                    method: "post",
-                    beforeSend: function() {
-                      loadSpin.open();
-                    },
-                    success: function(response) {
-                      loadSpin.close();
+        $.confirm({
+          title: 'Are you sure?',
+          content: "You won't be able to " + action + " this?",
+          backgroundDismissAnimation: 'glow',
+          type: 'orange',
+          typeAnimated: true,
+          autoClose: 'cancel|10000',
+          buttons: {
+            confirm: {
+              text: 'Yes, ' + action + ' it!',
+              btnClass: 'btn-success',
+              keys: ['enter', 'shift'],
+              action: function() {
+                $.ajax({
+                  url: url,
+                  data: data,
+                  method: "post",
+                  beforeSend: function() {
+                    loadSpin.open();
+                  },
+                  success: function(response) {
+                    loadSpin.close();
 
-                      if (responseFunction == "1" || responseFunction == 1) {
-                        $("#dataDiv").html(response);
-                      }
+                    if (responseFunction == "1" || responseFunction == 1) {
+                      $("#dataDiv").html(response);
+                    }
 
-                      if (responseFunction != undefined && responseFunction != "") {
-                        triggerResponseFunction(response);
-                        return;
-                      }
+                    if (responseFunction != undefined && responseFunction != "") {
+                      triggerResponseFunction(response);
+                      return;
+                    }
 
-                      if (response.successFunction == 'yes') {
+                    if (response.successFunction == 'yes') {
 
-                        successFunction(response);
+                      successFunction(response);
 
-                      } else {
+                    } else {
 
-                        if (response.masterAlert != 'off') {
+                      if (response.masterAlert != 'off') {
 
-                          if (response.successFunction == 'yes') {
+                        if (response.successFunction == 'yes') {
 
-                            successFunction(response);
+                          successFunction(response);
+
+                        } else {
+
+                          let notify = [];
+                          if (response.type == 'warning') {
+                            message = 'Warning';
+                            notify.status = "warning";
+                            reload = 1;
+
+                          } else if (response.type == 'danger') {
+                            message = 'Something went wrong. Please try again';
+                            notify.status = "danger";
+                            reload = 1;
+
+                          } else {
+                            message = 'Everything went well';
+                            notify.status = "success";
+
+                          }
+                          if (response.msg != undefined && response.msg != '') {
+                            message = response.msg;
+                          }
+
+                          notify.notify = [message];
+                          $.alert('ISuccessfully!');
+
+
+                          if (datatableId != undefined && datatableId != "") {
+
+                            $("#" + datatableId).DataTable().ajax.reload();
+
+                          } else if (datatableClass != undefined && datatableClass != "") {
+
+                            $("." + datatableClass).DataTable().ajax.reload();
+
 
                           } else {
 
-                            let notify = [];
-                            if (response.type == 'warning') {
-                              message = 'Warning';
-                              notify.status = "warning";
-                              reload = 1;
+                            if (response.reload != undefined && response.reload == "off") {
 
-                            } else if (response.type == 'danger') {
-                              message = 'Something went wrong. Please try again';
-                              notify.status = "danger";
-                              reload = 1;
+                            } else if (reload != 1) {
 
-                            } else {
-                              message = 'Everything went well';
-                              notify.status = "success";
-
-                            }
-                            if (response.msg != undefined && response.msg != '') {
-                              message = response.msg;
-                            }
-
-                            notify.notify = [message];
-                            $.alert('ISuccessfully!');
-
-
-                            if (datatableId != undefined && datatableId != "") {
-
-                              $("#" + datatableId).DataTable().ajax.reload();
-
-                            } else if (datatableClass != undefined && datatableClass != "") {
-
-                              $("." + datatableClass).DataTable().ajax.reload();
-
-
-                            } else {
-
-                              if (response.reload != undefined && response.reload == "off") {
-
-                              } else if (reload != 1) {
-
-                                location.reload();
-
-                              }
+                              location.reload();
 
                             }
 
                           }
 
                         }
+
                       }
+                    }
 
 
-                    },
-                    error: function(jqXHR, exception) {
-                      loadSpin.close();
-                      var msg = '';
-                      if (jqXHR.status === 0) {
-                        msg = 'Not connect.\n Verify Network.';
-                      } else if (jqXHR.status == 404) {
-                        msg = 'Requested page not found. [404]';
-                      } else if (jqXHR.status == 500) {
-                        msg = 'Internal Server Error [500].';
-                      } else if (exception === 'parsererror') {
-                        msg = 'Requested JSON parse failed.';
-                      } else if (exception === 'timeout') {
-                        msg = 'Time out error.';
-                      } else if (exception === 'abort') {
-                        msg = 'Ajax request aborted.';
-                      } else {
-                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
-                        let csrf = jqXHR.getResponseHeader('X-CSRF-TOKEN');
-                        if (csrf == null) {
-                          msg = "Session has expired. please refresh the page";
-                        }
+                  },
+                  error: function(jqXHR, exception) {
+                    loadSpin.close();
+                    var msg = '';
+                    if (jqXHR.status === 0) {
+                      msg = 'Not connect.\n Verify Network.';
+                    } else if (jqXHR.status == 404) {
+                      msg = 'Requested page not found. [404]';
+                    } else if (jqXHR.status == 500) {
+                      msg = 'Internal Server Error [500].';
+                    } else if (exception === 'parsererror') {
+                      msg = 'Requested JSON parse failed.';
+                    } else if (exception === 'timeout') {
+                      msg = 'Time out error.';
+                    } else if (exception === 'abort') {
+                      msg = 'Ajax request aborted.';
+                    } else {
+                      msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                      let csrf = jqXHR.getResponseHeader('X-CSRF-TOKEN');
+                      if (csrf == null) {
+                        msg = "Session has expired. please refresh the page";
                       }
-                      masterAlert('2', '', msg);
-                    },
-                  });
-                }
-              },
-              cancel: {
-                text: 'Cancel',
-                btnClass: 'btn-danger',
-                keys: ['esc'],
-                action: function() {}
+                    }
+                    masterAlert('2', '', msg);
+                  },
+                });
               }
-            }
-          });
-        } else {
-
-          $.ajax({
-            url: url,
-            data: data,
-            method: "post",
-            beforeSend: function() {
-              loadSpin.open();
             },
-            success: function(response) {
-              loadSpin.close();
+            cancel: {
+              text: 'Cancel',
+              btnClass: 'btn-danger',
+              keys: ['esc'],
+              action: function() {}
+            }
+          }
+        });
+      } else {
 
-              if (responseFunction == "1" || responseFunction == 1) {
-                $("#dataDiv").html(response);
-              }
+        $.ajax({
+          url: url,
+          data: data,
+          method: "post",
+          beforeSend: function() {
+            loadSpin.open();
+          },
+          success: function(response) {
+            loadSpin.close();
 
-              if (responseFunction != undefined && responseFunction != "") {
-                triggerResponseFunction(response);
-                return;
-              }
+            if (responseFunction == "1" || responseFunction == 1) {
+              $("#dataDiv").html(response);
+            }
 
-              if (response.successFunction == 'yes') {
+            if (responseFunction != undefined && responseFunction != "") {
+              triggerResponseFunction(response);
+              return;
+            }
 
-                successFunction(response);
+            if (response.successFunction == 'yes') {
 
-              } else {
+              successFunction(response);
 
-                if (response.masterAlert != 'off') {
+            } else {
 
-                  if (response.successFunction == 'yes') {
+              if (response.masterAlert != 'off') {
 
-                    successFunction(response);
+                if (response.successFunction == 'yes') {
+
+                  successFunction(response);
+
+                } else {
+
+                  let notify = [];
+                  if (response.type == 'warning') {
+                    message = 'Warning';
+                    notify.status = "warning";
+
+                  } else if (response.type == 'danger') {
+                    message = 'Something went wrong. Please try again';
+                    notify.status = "danger";
+
+                  } else {
+                    message = 'Everything went well';
+                    notify.status = "success";
+
+                  }
+                  if (response.msg != undefined && response.msg != '') {
+                    message = response.msg;
+                  }
+
+                  notify.notify = [message];
+                  $.alert('ISuccessfully!');
+
+
+                  if (datatableId != undefined && datatableId != "") {
+
+                    $("#" + datatableId).DataTable().ajax.reload();
+
+                  } else if (datatableClass != undefined && datatableClass != "") {
+
+                    $("." + datatableClass).DataTable().ajax.reload();
+
 
                   } else {
 
-                    let notify = [];
-                    if (response.type == 'warning') {
-                      message = 'Warning';
-                      notify.status = "warning";
+                    if (reload != 1) {
 
-                    } else if (response.type == 'danger') {
-                      message = 'Something went wrong. Please try again';
-                      notify.status = "danger";
-
-                    } else {
-                      message = 'Everything went well';
-                      notify.status = "success";
-
-                    }
-                    if (response.msg != undefined && response.msg != '') {
-                      message = response.msg;
-                    }
-
-                    notify.notify = [message];
-                    $.alert('ISuccessfully!');
-
-
-                    if (datatableId != undefined && datatableId != "") {
-
-                      $("#" + datatableId).DataTable().ajax.reload();
-
-                    } else if (datatableClass != undefined && datatableClass != "") {
-
-                      $("." + datatableClass).DataTable().ajax.reload();
-
-
-                    } else {
-
-                      if (reload != 1) {
-
-                        location.reload();
-
-                      }
+                      location.reload();
 
                     }
 
                   }
 
                 }
+
               }
-            },
-            error: function(jqXHR, exception) {
-              loadSpin.close();
-              var msg = '';
-              if (jqXHR.status === 0) {
-                msg = 'Not connect.\n Verify Network.';
-              } else if (jqXHR.status == 404) {
-                msg = 'Requested page not found. [404]';
-              } else if (jqXHR.status == 500) {
-                msg = 'Internal Server Error [500].';
-              } else if (exception === 'parsererror') {
-                msg = 'Requested JSON parse failed.';
-              } else if (exception === 'timeout') {
-                msg = 'Time out error.';
-              } else if (exception === 'abort') {
-                msg = 'Ajax request aborted.';
-              } else {
-                msg = 'Uncaught Error.\n' + jqXHR.responseText;
-                let csrf = jqXHR.getResponseHeader('X-CSRF-TOKEN');
-                if (csrf == null) {
-                  msg = "Session has expired. please refresh the page";
-                }
+            }
+          },
+          error: function(jqXHR, exception) {
+            loadSpin.close();
+            var msg = '';
+            if (jqXHR.status === 0) {
+              msg = 'Not connect.\n Verify Network.';
+            } else if (jqXHR.status == 404) {
+              msg = 'Requested page not found. [404]';
+            } else if (jqXHR.status == 500) {
+              msg = 'Internal Server Error [500].';
+            } else if (exception === 'parsererror') {
+              msg = 'Requested JSON parse failed.';
+            } else if (exception === 'timeout') {
+              msg = 'Time out error.';
+            } else if (exception === 'abort') {
+              msg = 'Ajax request aborted.';
+            } else {
+              msg = 'Uncaught Error.\n' + jqXHR.responseText;
+              let csrf = jqXHR.getResponseHeader('X-CSRF-TOKEN');
+              if (csrf == null) {
+                msg = "Session has expired. please refresh the page";
               }
-              masterAlert('2', '', msg);
-            },
-          });
-        }
+            }
+            masterAlert('2', '', msg);
+          },
+        });
       }
+    }
   </script>
 </head>
 

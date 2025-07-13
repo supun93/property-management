@@ -30,9 +30,15 @@ class UnitPaymentController extends Controller
 
     public function index($id, Request $request)
     {
+        $billingTypes = [];
         $contract = UnitContracts::find($id);
         if ($contract == null) {
             abort(403, "Invalid contract");
+        }
+
+        // $billingTypes[null] = "Rent";
+        foreach ($contract->unit->billingTypes ?? [] as $bt) {
+            $billingTypes[$bt->id] = $bt->billingType->name;
         }
 
         if ($this->trash) {
@@ -52,6 +58,8 @@ class UnitPaymentController extends Controller
             "paid_at"
         );
 
+
+
         $this->repository->setColumnDisplay("status", [$this->repository, 'displayStatusAs'], [true])
             ->setColumnLabel("contract.unit.property.name", "Property Name")
             ->setColumnLabel("contract.unit.unit_name", "Unit Name")
@@ -64,7 +72,7 @@ class UnitPaymentController extends Controller
             )
             ->setColumnSearchability("created_at", false)
             ->addFilter('status', 'Status', 'select', [0 => 'Pending', 2 => 'Pending Verification', 1 => 'Paid'])
-            ->addFilter('unit_billing_type_id', 'Billing Type', 'select', BillingTypes::pluck('name', 'id')->toArray())
+            ->addFilter('unit_billing_type_id', 'Billing Type', 'select', $billingTypes)
             ->addFilter('payment_date_from', 'From Date', 'date') // ✅ added
             ->addFilter('payment_date_to', 'To Date', 'date')     // ✅ added
             ->setDefaultOrder('payment_date', 'asc')
@@ -127,8 +135,7 @@ class UnitPaymentController extends Controller
             'payment_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
             'installment_number' => 'nullable|integer|min:1',
-            'note' => 'nullable|string|max:255',
-            'status' => 'required|in:0,1',
+            'note' => 'nullable|string|max:255'
         ]);
 
         // 📝 Update values
@@ -136,16 +143,6 @@ class UnitPaymentController extends Controller
         $payment->amount = $validated['amount'];
         $payment->installment_number = $validated['installment_number'] ?? null;
         $payment->note = $validated['note'] ?? null;
-        $payment->approval_remarks = $request['approval_remarks'];
-        $payment->status = $validated['status'];
-        if ($validated['status'] == 1) {
-            $payment->status_enum = "PAID";
-            $payment->paid_at = Carbon::now();
-        } else {
-            $payment->status_enum = "PENDING";
-            $payment->paid_at = null;
-        }
-
         $payment->save();
 
         return response()->json([

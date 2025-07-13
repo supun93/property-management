@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.css" />
 
 <div class="card">
-  <div class="card-header">
+  <div class="card-header bg-dark text-white">
     <div class="row">
       <div class="col-sm-6">
         <h4 class="card-title"><b>Unit Payment - Edit</b></h4>
@@ -46,18 +46,6 @@
         <label>Note</label>
         <input type="text" name="note" value="{{ $record->note }}" class="form-control" readonly>
       </div>
-      <div class="form-group">
-        <label>Remarks</label>
-        <textarea name="approval_remarks" class="form-control" rows="3" placeholder="Remarks">{{ $record->approval_remarks }}</textarea>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select name="status" class="form-control">
-          <option value="0" {{ $record->status == 0 ? 'selected' : '' }}>Pending</option>
-          <option value="1" {{ $record->status == 1 ? 'selected' : '' }}>Paid</option>
-        </select>
-      </div>
-
     </div>
 
     <div class="card-footer">

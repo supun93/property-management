@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('role')->default('tenant')->after("email"); // options: admin, owner, tenant
+        Schema::table('unit_payment_schedules', function (Blueprint $table) {
+            $table->unsignedBigInteger("invoice_id")->nullable();
+            $table->foreign("invoice_id")->references("id")->on("invoices");
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        //
     }
 };

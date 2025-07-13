@@ -20,10 +20,50 @@
         <hr>
         <h6>🏢 <b>Current Contract</b></h6>
         <p><strong>Unit:</strong> {{ $contract->unit->name ?? '-' }} ({{ $contract->unit->property->name ?? '-' }})</p>
-        <p><strong>Agreement:</strong> {{ $contract->start_date }} to {{ $contract->end_date }}</p>
+        <p><strong>Agreement:</strong> {{ $contract->agreement_start_date }} to {{ $contract->agreement_end_date }}</p>
         <p><strong>Rent:</strong> Rs. {{ number_format($contract->rent_amount, 2) }}</p>
-        <p><strong>Next Rent Due:</strong> {{ $contract->next_rent_due ?? '-' }}</p>
+        <p><strong>Next Rent Due:</strong> {{ $contract->next_rent_due_date ?? '-' }}</p>
         @endif
+
+        {{-- Invoice History --}}
+        <hr>
+        <h5>📄 Invoice History</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>PDF</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($invoices as $index => $invoice)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $invoice->name }}</td>
+                    <td>Rs. {{ number_format($invoice->total_amount, 2) }}</td>
+                    <td>{{ $invoice->status ? 'Paid' : 'Unpaid' }}</td>
+                    <td>{{ $invoice->payment_date }}</td>
+                    <td>
+                        <a href="{{ route('invoice.upload-form', $invoice->id) }}" class="btn btn-info btn-sm">View</a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6">No invoices found.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        {{-- Pagination --}}
+        <div class="d-flex justify-content-end">
+            {{ $invoices->links() }}
+        </div>
 
         {{-- Combined Payments --}}
         <hr>
@@ -113,44 +153,7 @@
             </div>
         </div>
 
-        {{-- Invoice History --}}
-        <hr>
-        <h5>📄 Invoice History</h5>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>PDF</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($invoices as $index => $invoice)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $invoice->name }}</td>
-                    <td>Rs. {{ number_format($invoice->amount, 2) }}</td>
-                    <td>{{ $invoice->status ? 'Paid' : 'Unpaid' }}</td>
-                    <td>{{ $invoice->payment_date }}</td>
-                    <td>
-                        <a href="{{ route('invoice.download', $invoice->id) }}" class="btn btn-sm btn-info">Download</a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6">No invoices found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        {{-- Pagination --}}
-        <div class="d-flex justify-content-end">
-            {{ $invoices->links() }}
-        </div>
+        
 
     </div>
 </div>

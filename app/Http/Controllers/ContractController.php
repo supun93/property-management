@@ -71,7 +71,9 @@ class ContractController extends Controller
                 [$this->approvalStatuses, '', true] // ✅ 3rd param: pass statuses + showChip true
             )
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
-            ->setColumnSearchability("created_at", false)->addRawColumns("payments");
+            ->setColumnSearchability("created_at", false)
+            ->setColumnSearchability("payments", false)
+            ->addRawColumns("payments");
 
 
         $query = UnitContracts::with(['tenant', 'unit']);

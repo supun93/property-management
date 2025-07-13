@@ -21,7 +21,8 @@ class UnitPaymentSchedules extends Model implements AuditableContract
         'note',
         'created_by',
         'updated_by',
-        'deleted_by'
+        'deleted_by', 
+        'invoice_id'
     ];
 
     protected $casts = [

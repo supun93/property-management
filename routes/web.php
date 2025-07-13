@@ -4,6 +4,7 @@ use App\Http\Controllers\BillingTypesController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceLineController;
+use App\Http\Controllers\PaymentSlipController;
 use App\Http\Controllers\PropertyCategoryController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\TenantController;
@@ -23,6 +24,12 @@ Route::group(['middleware' => 'auth'], function () {
     })->name('dashboard');
 
     Route::get('', [TenantController::class, 'dashboard'])->name('dashboard');
+
+    Route::prefix('slips')->name('slip.')->group(function () {
+        Route::post('upload', [PaymentSlipController::class, 'upload'])->name('upload');
+        Route::post('trash/{id}', [PaymentSlipController::class, 'delete'])->name('trash');
+    });
+    
 });
 
 Route::group(['middleware' => 'is_manager'], function () {
@@ -151,6 +158,13 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('trash/{id}', [InvoiceController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [InvoiceController::class, 'restore'])->name('restore');
         Route::post('search_data/{id}', [InvoiceController::class, 'searchData'])->name('search_data');
+        Route::get('download/{id}', [InvoiceController::class, 'download'])->name('download');
+        Route::get('upload/form/{id}', [InvoiceController::class, 'uploadForm'])->name('upload-form');
+
+        Route::get('pending/list', [InvoiceController::class, 'pendingIndex'])->name('pending.index');
+        Route::post('pending/list', [InvoiceController::class, 'pendingIndex']);
+        Route::get('payment/history', [InvoiceController::class, 'paymentHistory'])->name('payment.history');
+        Route::post('payment/history', [InvoiceController::class, 'paymentHistory']);
     });
 
     Route::prefix('invoice_lines')->name('invoice_lines.')->group(function () {
@@ -165,6 +179,11 @@ Route::group(['middleware' => 'is_manager'], function () {
         Route::post('trash/{id}', [InvoiceLineController::class, 'delete'])->name('trash');
         Route::post('restore/{id}', [InvoiceLineController::class, 'restore'])->name('restore');
         Route::post('search_data', [InvoiceLineController::class, 'searchData'])->name('search_data');
+    });
+
+    Route::prefix('slips')->name('slips.')->group(function () {
+        Route::get('pending', [PaymentSlipController::class, 'pending'])->name('pending');
+        Route::post('{id}/action', [PaymentSlipController::class, 'updateStatus'])->name('update_status');
     });
 });
 

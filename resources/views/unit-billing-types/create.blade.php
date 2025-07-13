@@ -3,7 +3,7 @@
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magicsuggest/2.1.5/magicsuggest-min.css" />
 <div class="card">
-  <div class="card-header">
+  <div class="card-header bg-dark text-white">
     <div class="row">
       <div class="col-sm-6">
         <h4 class="card-title"><b>Unit Billing Types - New</b></h4>

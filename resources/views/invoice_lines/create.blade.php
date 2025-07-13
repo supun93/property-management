@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="card">
-  <div class="card-header">
+  <div class="card-header bg-dark text-white">
     <div class="row">
       <div class="col-sm-6">
         <h4 class="card-title"><b>Invoice Line - New</b></h4>

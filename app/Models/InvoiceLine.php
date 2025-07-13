@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\HasAuditFields;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
-use OwenIt\Auditing\Auditable;
 
-class InvoiceLine extends Model implements AuditableContract
+class InvoiceLine extends Model
 {
-    use SoftDeletes, Auditable, HasAuditFields;
+    use SoftDeletes;
 
     protected $fillable = [
         'invoice_id',
@@ -18,8 +15,6 @@ class InvoiceLine extends Model implements AuditableContract
         'unit_billing_type_id',
         'description',
         'amount',
-        'created_by',
-        'updated_by'
     ];
 
     protected $casts = [

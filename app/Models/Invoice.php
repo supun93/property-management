@@ -15,7 +15,8 @@ class Invoice extends Model implements AuditableContract
     protected $fillable = [
         'created_by',
         'updated_by',
-        'deleted_by'
+        'deleted_by', 
+        'name', 'total_amount', 'payment_date', 'tenant_id', 'contract_id'
     ];
 
     protected $casts = [
@@ -46,4 +47,16 @@ class Invoice extends Model implements AuditableContract
     {
         return $this->hasMany(InvoiceLine::class, 'invoice_id', 'id');
     }
+
+    public function slips()
+    {
+        return $this->hasMany(PaymentSlip::class, 'invoice_id', 'id');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(UnitPaymentSchedules::class, 'invoice_id', 'id');
+    }
+
+    
 }
