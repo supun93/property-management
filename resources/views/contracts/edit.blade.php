@@ -46,6 +46,11 @@
       </div>
 
       <div class="form-group">
+        <label>Billing Date</label>
+        <input type="date" name="billing_date" class="form-control" placeholder="Billing Date" value="{{ $record->billing_date }}" required>
+      </div>
+
+      <div class="form-group">
         <label>Payment Type</label>
         <select name="rent_payment_type" class="form-control" required id="rent_payment_type" disabled>
           <option value="">Select</option>

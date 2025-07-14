@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
             $table->date('agreement_start_date')->nullable();
             $table->date('agreement_end_date')->nullable();
+            $table->date('billing_date')->nullable();
 
             $table->integer('rent_payment_type')->nullable()->comment('1:full, 2:installment');
             $table->decimal('full_amount', 10, 2)->nullable();

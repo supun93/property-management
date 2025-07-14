@@ -8,6 +8,7 @@ use App\Models\Contract;
 use App\Models\Payments;
 use App\Models\UnitContracts;
 use App\Models\UnitPaymentSchedules;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
@@ -108,21 +109,21 @@ class ContractController extends Controller
         $rentAmount = $model->rent_amount;
         $rentPaymentType = $model->rent_payment_type;
         $durationInMonths = $model->duration_in_months;
-        $nextDueDate = "";
-        $totalInstallment = "";
+        $billingDate = Carbon::parse($model->billing_date)->startOfDay(); // Preserve billing date time
+        $nextDueDate = null;
+        $totalInstallment = null;
+
         // 👉 Generate rent installments (monthly)
         if ($rentAmount > 0 && $rentPaymentType == 2) {
             $totalInstallment = ceil($fullAmount / $rentAmount);
-            $nextDueDate = now()->addMonth();
-            $startDate = now();
+            $nextDueDate = $billingDate->copy()->addMonth(); // Don't mutate original
 
             for ($i = 1; $i <= $durationInMonths; $i++) {
-                $dueDate = $startDate->copy()->addMonths($i - 1)->startOfMonth();
+                $dueDate = $billingDate->copy()->addMonths($i - 1); // e.g., 2025-07-15, 2025-08-15, etc.
 
-                // 🛑 Skip if schedule already exists for this month
+                // 🛑 Skip if exact date already exists
                 $exists = UnitPaymentSchedules::where('unit_contract_id', $contractId)
-                    ->whereMonth('payment_date', $dueDate->month)
-                    ->whereYear('payment_date', $dueDate->year)
+                    ->whereDate('payment_date', $dueDate->toDateString())
                     ->where('is_rent', 1)
                     ->exists();
 
@@ -135,20 +136,18 @@ class ContractController extends Controller
                 $payment->payment_date = $dueDate;
                 $payment->is_rent = 1;
                 $payment->status = 0;
-                $payment->note = "Rent of installment_number " . $i;
+                $payment->note = "Rent of installment_number $i";
                 $payment->save();
             }
         }
 
-        // 👉 Generate billing type payments for current month
+        // 👉 Generate billing type payments for the same billing date
         foreach ($billingTypes as $bType) {
-            $dueDate = now()->startOfMonth();
+            $dueDate = $billingDate->copy();
 
-            // 🛑 Skip if billing type already exists this month
             $exists = UnitPaymentSchedules::where('unit_contract_id', $contractId)
                 ->where('unit_billing_type_id', $bType->id)
-                ->whereMonth('payment_date', $dueDate->month)
-                ->whereYear('payment_date', $dueDate->year)
+                ->whereDate('payment_date', $dueDate->toDateString())
                 ->exists();
 
             if ($exists) continue;
@@ -167,9 +166,10 @@ class ContractController extends Controller
         return [
             'total_installments' => $totalInstallment,
             'rent_amount' => $rentAmount,
-            'next_due_date' => $nextDueDate,
+            'next_due_date' => optional($nextDueDate)->toDateString(),
         ];
     }
+
 
 
     public function save(Request $request)
@@ -180,6 +180,7 @@ class ContractController extends Controller
             'unit_id' => 'required|exists:units,id',
             'agreement_start_date' => 'required|date',
             'agreement_end_date' => 'required|date|after_or_equal:agreement_start_date',
+            'billing_date' => 'required|date',
             // 'rent_payment_type' => 'nullable|integer',
             // 'full_amount' => 'nullable|numeric|min:0',
             // 'rent_amount' => 'required|numeric|min:0',
@@ -192,6 +193,7 @@ class ContractController extends Controller
         $record->unit_id = $request->unit_id;
         $record->agreement_start_date = $request->agreement_start_date;
         $record->agreement_end_date = $request->agreement_end_date;
+        $record->billing_date = $request->billing_date;
         $record->rent_amount = $request->rent_amount;
         $record->deposit_amount = $request->deposit_amount;
         $record->terms = $request->terms;
@@ -232,6 +234,7 @@ class ContractController extends Controller
             'unit_id' => 'required|exists:units,id',
             'agreement_start_date' => 'required|date',
             'agreement_end_date' => 'required|date|after_or_equal:agreement_start_date',
+            'billing_date' => 'required|date',
             'rent_amount' => 'required|numeric|min:0',
             'deposit_amount' => 'nullable|numeric|min:0',
             'terms' => 'nullable|string',
@@ -242,6 +245,7 @@ class ContractController extends Controller
         $record->unit_id = $request->unit_id;
         $record->agreement_start_date = $request->agreement_start_date;
         $record->agreement_end_date = $request->agreement_end_date;
+        $record->billing_date = $request->billing_date;
         $record->rent_amount = $request->rent_amount;
         $record->deposit_amount = $request->deposit_amount;
         $record->terms = $request->terms;
