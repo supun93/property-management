@@ -182,8 +182,8 @@ class ContractController extends Controller
             'agreement_end_date' => 'required|date|after_or_equal:agreement_start_date',
             // 'rent_payment_type' => 'nullable|integer',
             // 'full_amount' => 'nullable|numeric|min:0',
-            'rent_amount' => 'required|numeric|min:0',
-            'deposit_amount' => 'nullable|numeric|min:0',
+            // 'rent_amount' => 'required|numeric|min:0',
+            // 'deposit_amount' => 'nullable|numeric|min:0',
             'terms' => 'nullable|string',
         ]);
 
@@ -203,21 +203,21 @@ class ContractController extends Controller
         $record->full_amount = $request->full_amount;
         $record->save();
 
-        // Calculate rental payment fields
-        $calc = $this->generateRentalPayments($record);
+        if ($request->rent_payment_type == 2) {
+            // Calculate rental payment fields
+            $calc = $this->generateRentalPayments($record);
+            $record->rent_amount = $calc['rent_amount'];
+            $record->total_installments = $calc['total_installments'];
+            $record->next_rent_due_date = $calc['next_due_date'];
 
-        $record->rent_amount = $calc['rent_amount'];
-        $record->total_installments = $calc['total_installments'];
-        $record->next_rent_due_date = $calc['next_due_date'];
-
-        if ($calc['total_installments'] == 1) {
-            $record->completed_installments = 1;
-            $record->total_paid_amount = $record->full_amount;
-        } else {
-            $record->completed_installments = 0;
-            $record->total_paid_amount = $record->rent_amount;
+            if ($calc['total_installments'] == 1) {
+                $record->completed_installments = 1;
+                $record->total_paid_amount = $record->full_amount;
+            } else {
+                $record->completed_installments = 0;
+                $record->total_paid_amount = $record->rent_amount;
+            }
         }
-
 
         $record->save();
 

@@ -47,29 +47,29 @@
 
       <div class="form-group">
         <label>Payment Type</label>
-        <select name="rent_payment_type" class="form-control" required id="rent_payment_type">
+        <select name="rent_payment_type" class="form-control" required id="rent_payment_type" disabled>
           <option value="">Select</option>
           <option value="1" @if($record->rent_payment_type == 1) selected @endif>Full Payment</option>
           <option value="2" @if($record->rent_payment_type == 2) selected @endif>Installment</option>
         </select>
       </div>
 
-      <div class="form-group full_amount" style="display:none">
+      <div class="form-group full_amount" @if($record->rent_payment_type == 2) style="display:none" @endif>
         <label>Full Amount</label>
         <input type="number" step="0.01" name="full_amount" id="full_amount_value" class="form-control" placeholder="Enter Full Amount" value="{{ $record->full_amount }}">
       </div>
 
-      <div class="form-group Installment" style="display:none">
+      <div class="form-group Installment" @if($record->rent_payment_type == 1) style="display:none" @endif>
         <label>Rent Amount</label>
         <input type="number" step="0.01" name="rent_amount" class="form-control" placeholder="Enter rent" value="{{ $record->rent_amount }}">
       </div>
 
-      <div class="form-group Installment" style="display:none">
+      <div class="form-group Installment" @if($record->rent_payment_type == 1) style="display:none" @endif>
         <label>Deposit Amount</label>
         <input type="number" step="0.01" name="deposit_amount" class="form-control" placeholder="Enter Deposit" value="{{ $record->deposit_amount }}">
       </div>
 
-      <div class="form-group Installment" style="display:none">
+      <div class="form-group Installment" @if($record->rent_payment_type == 1) style="display:none" @endif>
         <label>Duration In Months</label>
         <input type="number" step="0.01" name="duration_in_months" id="duration_in_months_value" class="form-control" placeholder="Enter Duration In Months" value="{{ $record->duration_in_months }}">
       </div>
