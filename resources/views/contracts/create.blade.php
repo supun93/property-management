@@ -84,7 +84,7 @@
         <select name="status" class="form-control">
           <option value="0">Pending</option>
           <option value="1">Active</option>
-          <option value="2">Terminated</option>
+          <option value="2">Inactive</option>
         </select>
       </div>
 

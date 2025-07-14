@@ -84,7 +84,7 @@
         <select name="status" class="form-control">
           <option value="0" {{ $record->status == 0 ? 'selected' : '' }}>Pending</option>
           <option value="1" {{ $record->status == 1 ? 'selected' : '' }}>Active</option>
-          <option value="2" {{ $record->status == 2 ? 'selected' : '' }}>Terminated</option>
+          <option value="2" {{ $record->status == 2 ? 'selected' : '' }}>Inactive</option>
         </select>
       </div>
     </div>

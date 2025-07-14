@@ -276,4 +276,6 @@ class InvoiceController extends BaseController
         $record = Invoice::findOrFail($id);
         return view('unit-payments.view', compact('record'));
     }
+
+    
 }

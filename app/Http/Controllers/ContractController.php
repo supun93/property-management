@@ -24,14 +24,7 @@ class ContractController extends Controller
     public $statuses = [
         'Active' => ['id' => 1, 'label' => 'Active', 'class' => 'success'],
         'Pending' => ['id' => 0, 'label' => 'Pending', 'class' => 'warning'],
-        'Terminated' => ['id' => 2, 'label' => 'Terminated', 'class' => 'danger'],
-    ];
-
-    public $approvalStatuses = [
-        'Not sent for approval' => ['id' => null, 'label' => 'Not sent for approval', 'class' => 'info'],
-        'Pending Approval' => ['id' => 0, 'label' => 'Pending Approval', 'class' => 'warning'],
-        'Approved' => ['id' => 1, 'label' => 'Approved', 'class' => 'success'],
-        'Declined' => ['id' => 2, 'label' => 'Declined', 'class' => 'danger']
+        'Inactive' => ['id' => 2, 'label' => 'Inactive', 'class' => 'danger'],
     ];
 
     public function index(Request $request)
@@ -53,7 +46,7 @@ class ContractController extends Controller
                 "next_rent_due_date",
                 "payments",
                 "status",
-                "approval_status",
+                // "approval_status",
                 "created_at"
             )
             ->setColumnLabel("tenant.name", "Tenant Name")
@@ -65,14 +58,12 @@ class ContractController extends Controller
                 [$this->repository, 'displayStatusAs'],
                 [$this->statuses, '', true] // ✅ 3rd param: pass statuses + showChip true
             )
-            ->setColumnDisplay(
-                'approval_status',
-                [$this->repository, 'displayStatusAs'],
-                [$this->approvalStatuses, '', true] // ✅ 3rd param: pass statuses + showChip true
-            )
             ->setColumnDisplay("created_at", [$this->repository, 'displayCreatedAtAs'], [false])
             ->setColumnSearchability("created_at", false)
             ->setColumnSearchability("payments", false)
+            ->addFilter('agreement_start_date', 'Agreement Start Date', 'date') // ✅ added
+            ->addFilter('agreement_end_date', 'Agreement End Date', 'date') // ✅ added
+            ->addFilter('status', 'Status', 'select', [0 => 'Pending', 1 => 'Active', 2 => 'Inactive'])
             ->addRawColumns("payments");
 
 
@@ -105,7 +96,7 @@ class ContractController extends Controller
     }
     public function edit($id)
     {
-        $record = UnitContracts::with(['tenant', 'unit'])->findOrFail($id);
+        $record = UnitContracts::with(['tenant', 'unit'])->withTrashed()->findOrFail($id);
         return view('contracts.edit', compact('record'));
     }
 
@@ -205,6 +196,7 @@ class ContractController extends Controller
         $record->deposit_amount = $request->deposit_amount;
         $record->terms = $request->terms;
         $record->status = $request->status;
+        $record->approval_status = $request->status;
 
         $record->rent_payment_type = $request->rent_payment_type;
         $record->duration_in_months = $request->duration_in_months;
@@ -234,7 +226,7 @@ class ContractController extends Controller
 
     public function update($id, Request $request)
     {
-        $record = UnitContracts::findOrFail($id);
+        $record = UnitContracts::withTrashed()->findOrFail($id);
         $data = request()->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'unit_id' => 'required|exists:units,id',
@@ -254,6 +246,7 @@ class ContractController extends Controller
         $record->deposit_amount = $request->deposit_amount;
         $record->terms = $request->terms;
         $record->status = $request->status;
+        $record->approval_status = $request->status;
         $record->save();
 
         $calc = $this->generateRentalPayments($record);

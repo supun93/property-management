@@ -111,7 +111,7 @@ class IndexRepositoryHelper
 
         if (!$matched) {
             return $showChip
-                ? '<span class="badge badge-secondary">' . ($defaultLabel ?: '-') . '</span>'
+                ? '<button type="button" disabled class="btn btn-secondary btn-sm">' . ($defaultLabel ?: '-') . '</button>'
                 : ($defaultLabel ?: '-');
         }
 
@@ -119,7 +119,7 @@ class IndexRepositoryHelper
             return $matched['label'];
         }
 
-        return '<span class="badge badge-' . $matched['class'] . '">' . $matched['label'] . '</span>';
+        return '<button type="button" disabled class="btn btn-sm btn-' . $matched['class'] . '">' . $matched['label'] . '</button>';
     }
 
 
@@ -262,9 +262,11 @@ class IndexRepositoryHelper
 
     public function displayCreatedAtAs($value, $showTime = false)
     {
-        return $showTime
-            ? $value->format('d M Y H:i')
-            : $value->format('d M Y');
+        $response = $showTime
+            ? $value->format('Y-m-d   H:i:A')
+            : $value->format('Y-m-d');
+
+            return $value;
     }
 
     public function index(Builder $query)
@@ -328,26 +330,28 @@ class IndexRepositoryHelper
         $datatable->addColumn('actions', function ($item) {
             $model = class_basename($item);
             $routePrefix = Str::kebab($model);
-            $buttons = '';
+            $buttons = '<div class="index-actions pull-right d-flex justify-content-center">';
 
             if ($this->viewData['edit']) {
-                $buttons .= '<a href="' . route($routePrefix . '.edit', $item->id) . '" class="text-indigo-600 text-sm" style="margin-right:10px"><span class="fa fa-edit"></span> Edit</a> ';
+                $buttons .= '<a href="' . route($routePrefix . '.edit', $item->id) . '" class="btn btn-sm" style="color:#282862"><span class="fa fa-edit"></span> Edit</a> ';
             }
 
             if ($this->viewData['trash']) {
                 $route = route($routePrefix . '.trash', $item->id);
-                $buttons .= '<button class="btn btn-sm btn-link text-danger trashButton" data-url="' . $route . '" style="margin-right:10px">🗑️</button> ';
+                $buttons .= '<button class="btn btn-sm trashButton" data-url="' . $route . '" style="color:#e43344"><span class="fa fa-trash"></span> Trash</button> ';
             }
 
             if ($this->viewData['restore']) {
                 $route = route($routePrefix . '.restore', $item->id);
-                $buttons .= '<button class="btn btn-sm btn-link text-success restoreButton" data-url="' . $route . '" style="margin-right:10px">♻️</button> ';
+                $buttons .= '<button class="btn btn-sm restoreButton" data-url="' . $route . '" style="color:green"><span class="fa fa-window-restore"></span> Restore</button> ';
             }
 
             if ($this->viewData['download']) {
                 $route = route($routePrefix . '.download', $item->id);
-                $buttons .= '<a href="' . $route . '" class="text-indigo-600 text-sm"><span class="fa fa-download"></span> Download</a> ';
+                $buttons .= '<a href="' . $route . '" class="btn btn-sm"><span class="fa fa-download" style="color:green"></span> Download</a> ';
             }
+
+            $buttons .= '</div>';
 
             return $buttons;
         });

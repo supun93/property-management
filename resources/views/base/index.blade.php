@@ -41,6 +41,10 @@
     div.dataTables_processing:not([style*="display: none"]) {
         opacity: 1;
     }
+
+    .dt-button {
+        margin-bottom: 5px !important;
+    }
 </style>
 @endpush
 @section('content')
@@ -56,25 +60,25 @@
             <div class="col-sm-6">
                 <div class="float-right">
                     @if($viewData["add"])
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info btn-sm">
-                            <span class="fa fa-plus"></span> ADD NEW
-                        </a>
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.create', $refId) }}" class="btn btn-info btn-sm">
+                        <span class="fa fa-plus"></span> ADD NEW
+                    </a>
                     @endif
 
                     @if(Str::contains($tableTitle, 'Trash'))
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info btn-sm">
-                            <span class="fa fa-list"></span> VIEW LIST
-                        </a>
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.index', $refId) }}" class="btn btn-info btn-sm">
+                        <span class="fa fa-list"></span> VIEW LIST
+                    </a>
                     @elseif($viewData["trashList"])
 
-                        <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger btn-sm">
-                            🗑️ VIEW TRASH
-                        </a>
+                    <a href="{{ route(Str::kebab(class_basename($model)) . '.trash-list', $refId) }}" class="btn btn-danger btn-sm">
+                        🗑️ VIEW TRASH
+                    </a>
                     @endif
                     @if($extraListButtonUrl)
-                        <a href="{{ $extraListButtonUrl }}" class="btn btn-info btn-sm">
-                            <span class="fa fa-list"></span> {{ $extraListButtonLabel }}
-                        </a>
+                    <a href="{{ $extraListButtonUrl }}" class="btn btn-info btn-sm">
+                        <span class="fa fa-list"></span> {{ $extraListButtonLabel }}
+                    </a>
                     @endif
                 </div>
             </div>
@@ -102,9 +106,9 @@
                 @endif
             </div>
             @endforeach
-            <div class="col-md-2 d-flex align-items-end">
+            <!-- <div class="col-md-1 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Filter</button>
-            </div>
+            </div> -->
         </form>
         @endif
         <table id="main-table" class="table table-bordered table-striped">
@@ -140,6 +144,7 @@
                 exportOptions: {
                     columns: ':not(:last-child)' // exclude action column
                 },
+                className: 'dt-button buttons-excel buttons-html5 btn btn-info btn-sm', // 👈 merged classes here
                 action: function(e, dt, button, config) {
                     // Ensure export applies to filtered data
                     dt.ajax.reload(() => {
@@ -247,7 +252,7 @@
         });
     });
 
-    $(document).on('submit', '#filterForm', function(e) {
+    $(document).on('change', '#filterForm', function(e) {
         e.preventDefault();
         var url = $(this).data('url');
         $('#main-table').DataTable().ajax.reload();
