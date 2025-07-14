@@ -108,12 +108,12 @@ class ContractController extends Controller
         $rentAmount = $model->rent_amount;
         $rentPaymentType = $model->rent_payment_type;
         $durationInMonths = $model->duration_in_months;
-
-        $totalInstallment = ceil($fullAmount / $rentAmount);
-        $nextDueDate = now()->addMonth();
-
+        $nextDueDate = "";
+        $totalInstallment = "";
         // 👉 Generate rent installments (monthly)
         if ($rentAmount > 0 && $rentPaymentType == 2) {
+            $totalInstallment = ceil($fullAmount / $rentAmount);
+            $nextDueDate = now()->addMonth();
             $startDate = now();
 
             for ($i = 1; $i <= $durationInMonths; $i++) {
@@ -203,9 +203,9 @@ class ContractController extends Controller
         $record->full_amount = $request->full_amount;
         $record->save();
 
+        // Calculate rental payment fields
+        $calc = $this->generateRentalPayments($record);
         if ($request->rent_payment_type == 2) {
-            // Calculate rental payment fields
-            $calc = $this->generateRentalPayments($record);
             $record->rent_amount = $calc['rent_amount'];
             $record->total_installments = $calc['total_installments'];
             $record->next_rent_due_date = $calc['next_due_date'];
