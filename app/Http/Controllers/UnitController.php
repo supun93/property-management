@@ -144,12 +144,12 @@ class UnitController extends Controller
             $query = $query->doesntHave('activeTenent');  
         }
 
-        $records = $query->limit(10)->get(['id', 'unit_name']);
+        $records = $query->limit(10)->get();
         $data = [];
         foreach ($records as $rec) {
             $row = [];
             $row["id"] = $rec->id;
-            $row["name"] = $rec->unit_name;
+            $row["name"] = $rec->property->name . ' - ' . $rec->unit_name;
             $data[] = $row;
         }
         return response()->json($data);
